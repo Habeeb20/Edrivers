@@ -445,6 +445,7 @@ import MyRentedCars from './MyRentedCar';
 import ProviderAnnouncements from './DriverAnnouncement';
 import VehicleManagement from './VehicleManagement';
 import TaskManagement from './TaskManagement';
+import ReferralPointsCard from '../ReferralPointsCard';
 // Import other components as needed: import Trips from './Trips'; etc.
 
 const PRIMARY_500 = '#3B82F6';
@@ -540,7 +541,7 @@ const Dashboard = () => {
   // Links that live in the top-right user icon dropdown
   const userMenuLinks = [
     { view: 'profile', label: 'Profile', icon: User },
-    { view: 'verification', label: 'Verification', icon: ShieldCheck },
+    // { view: 'verification', label: 'Verification', icon: ShieldCheck },
     { view: 'loyalties', label: 'Loyalties', icon: Award },
     { view: 'wallet', label: 'Wallet', icon: Wallet },
     { view: 'subscribe', label: 'Subscribe to hire on demand', icon: MapPin, role: 'driver' },
@@ -615,9 +616,7 @@ const Dashboard = () => {
         );
       case 'loyalties':
         return (
-          <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500">
-            Loyalties page coming soon.
-          </div>
+        <ReferralPointsCard />
         );
       default:
         return <Overview />;

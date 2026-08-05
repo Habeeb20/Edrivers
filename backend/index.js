@@ -26,6 +26,7 @@ import announcementsRoute from "./routes/announcementRoute.js"
 import videorouter from "./routes/videoRoutes.js"
 import { activityMiddleware, protect } from "./middleware/verifyToken.js";
 import walletRoutes from "./routes/walletRoute.js"
+import loyaltyRoutes from "./routes/loyaltyRoutes.js"
 dotenv.config();
 const app = express();
 connectDb()
@@ -79,7 +80,7 @@ app.use("/api/hire-on-demand", hireondemandRoutes)
 app.use("/api/vetted-drivers", vettedDriversRoute)
 app.use("/api/fulltime-hire", fulltimeRoute)
 app.use("/api/announcements", announcementsRoute)
-
+app.use('/api/loyalty', loyaltyRoutes)
 // ...
 
 // await User.create({

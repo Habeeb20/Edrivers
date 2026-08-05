@@ -63,6 +63,60 @@ const userSchema = new mongoose.Schema(
   expiresAt: { type: Date },
   attempts: { type: Number, default: 0 },
 },
+
+totalLoyaltyEarnedFromRegistrations: {
+  type: Number,
+  default: 0
+},
+
+    loyaltyPoints: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+
+  // Optional: track how points were earned (audit trail)
+  loyaltyTransactions: [{
+    type: { type: String, enum: ['hire_completed','completed_hire_as_provider', 'completed_hire_as_client',   'user_registration', 'referral',     'referral_signup',   // ADD: 20 points — someone signed up with their referral link
+      'job_referral', ] },
+    amount: Number,
+    hireId: { type: mongoose.Schema.Types.ObjectId, ref: 'HireRequest' },
+    createdAt: { type: Date, default: Date.now }
+  }],
+    // ── Loyalty / Referral Redemption Tracking ──────────────────────────
+totalPointsRedeemed: {
+  type: Number,
+  default: 0,
+  min: 0,
+},
+
+redemptionRequests: [{
+  pointsRequested: { type: Number, required: true },
+  amountRequested: { type: Number, required: true }, // in Naira, 1:1 with points
+
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending',
+  },
+
+  // Snapshot of wallet details AT THE TIME of the request — protects
+  // against the admin sending money to a stale/changed account later.
+  walletSnapshot: {
+    accountNumber: String,
+    accountName: String,
+    bankName: String,
+  },
+
+  requestedAt: { type: Date, default: Date.now },
+  approvedAt: Date,
+  approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  rejectedAt: Date,
+  rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  rejectionReason: { type: String, trim: true, maxlength: 300 },
+}],
+
+
     // ==================== LOCATION (Fixed) ====================
     location: {
       type: {
