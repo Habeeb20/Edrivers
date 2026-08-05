@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E drivers</title>
+  <script 
+    src={`https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places&callback=Function.prototype`} 
+    async 
+    defer
+  ></script>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QLQWDBBNR1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-QLQWDBBNR1');
+</script>
+
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+  window.DataCoreConfig = {
+    apiKey:   'mH9QMlsb69e5da71063u5o1D4yxZ9bvJSQGxi0YMYHeNGCbC',
+    endpoint: 'https://backend-crawler.eproperties.ng/api/webhook/push',
+    spa:      true,
+  };
+</script>
+<script src="https://backend-crawler.eproperties.ng/sdk/datacore.js" async></script>
+
+  </body>
+</html>
