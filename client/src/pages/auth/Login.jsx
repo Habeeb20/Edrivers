@@ -639,9 +639,9 @@ const Login = () => {
           </Link>
         </motion.div>
 
-        <motion.div className="absolute bottom-8 left-4 text-gray-400" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 0.5, x: 0 }} transition={{ delay: 0.5 }}>
+        {/* <motion.div className="absolute bottom-8 left-4 text-gray-400" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 0.5, x: 0 }} transition={{ delay: 0.5 }}>
           <ArrowLeft className="h-6 w-6" />
-        </motion.div>
+        </motion.div> */}
       </motion.div>
 
       {/* ────────────────────────────────────────────────

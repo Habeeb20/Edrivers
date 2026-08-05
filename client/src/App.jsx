@@ -156,6 +156,7 @@ import { trackPageView } from './utils/analytics';
 
 import EAuthLoginMinimal from './pages/auth/LoginFromOtherWeb';
 import GoToTopButton from './pages/GotoTopButton';
+import VerifyEmail from './pages/auth/VerifyEmail';
 
 // ==================== Layout Components ====================
 const Layout = () => {
@@ -238,6 +239,7 @@ function App() {
             <Route path="/loginfromotherweb" element={<EAuthLoginMinimal />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/services" element={<DriverService />} />

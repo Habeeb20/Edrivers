@@ -10,9 +10,9 @@ import { useDispatch, useSelector,} from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { User, Mail, Lock, UserCheck, Eye, EyeOff, Facebook } from 'lucide-react';
+import { User, Mail, Lock, UserCheck, Eye, EyeOff, Facebook, ChevronDown } from 'lucide-react';
 import LoadingSpinner from '../../utils/LoadingSpinner';
-
+import PasswordStrengthMeter from '../../utils/passwordstrenght';
 import { signupAsync } from '../../store/slices/userSlice';
 
 const PRIMARY_500 = '#3b82f6';  // blue-500
@@ -26,10 +26,10 @@ const Signup = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+  const { register, handleSubmit, watch, getValues, formState: { errors }, reset } = useForm({
     defaultValues: { role: 'client' },
   });
-
+const passwordValue = watch('password', '');
     useEffect(() => {
     const refCode = searchParams.get('ref');
     if (refCode) {
@@ -48,19 +48,15 @@ const Signup = () => {
     dispatch(signupAsync(signupData));
   };
 
-  useEffect(() => {
-    if (token && user) {
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      toast.success(successMessage || 'Account created successfully!', {
-        description: 'Welcome to your e-drivers. Redirecting to dashboard...',
-        duration: 3000,
-      });
-
-      setTimeout(() => navigate('/dashboard'), 2000);
-    }
-  }, [token, user, successMessage, navigate]);
+useEffect(() => {
+  if (successMessage) {
+    toast.success(successMessage || 'Account created successfully!', {
+      description: 'Check your email for the verification code.',
+      duration: 3000,
+    });
+    navigate('/verify-email', { state: { email: getValues('email') } });
+  }
+}, [successMessage, navigate]);
 
   useEffect(() => {
     if (error) {
@@ -148,7 +144,7 @@ const Signup = () => {
                 <Mail className="absolute left-3 top-4 h-5 w-5 text-gray-400" />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
               </div>
-
+{/* 
               <div className="relative">
                 <input
                   {...register('password', {
@@ -168,20 +164,86 @@ const Signup = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-              </div>
+              </div> */}
 
               <div className="relative">
-                <select
-                  {...register('role', { required: 'Please select a role' })}
-                  className="w-full pl-10 pr-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/20 transition appearance-none bg-white"
-                >
-                  <option value="">Choose your role</option>
-                  <option value="client">User / Customer</option>
-                  <option value="driver">Driver / Partner</option>
-                </select>
-                <UserCheck className="absolute left-3 top-4 h-5 w-5 text-gray-400" />
-                {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>}
-              </div>
+  <input
+    {...register('password', {
+      required: 'Password is required',
+      minLength: { value: 8, message: 'Password must be at least 8 characters' },
+      validate: (value) => {
+        const hasUpper = /[A-Z]/.test(value);
+        const hasLower = /[a-z]/.test(value);
+        const hasNumber = /[0-9]/.test(value);
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>_\-+=[\]/~`]/.test(value);
+        return (hasUpper && hasLower && hasNumber && hasSpecial) ||
+          'Password needs uppercase, lowercase, a number, and a special character';
+      },
+    })}
+    type={showPassword ? 'text' : 'password'}
+    placeholder="Create Password"
+    className="w-full pl-10 pr-12 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/20 transition"
+  />
+  <Lock className="absolute left-3 top-4 h-5 w-5 text-gray-400" />
+  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-4 text-gray-400 hover:text-gray-600">
+    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+  </button>
+  {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+  <PasswordStrengthMeter password={passwordValue} />
+</div>
+
+
+                <div className="relative">
+      {/* --------------------------------------------------- */}
+      {/*   The select – note the extra `pr-10` for the arrow   */}
+      {/* --------------------------------------------------- */}
+      <select
+        {...register('role', { required: 'Please select a role' })}
+        className="
+          w-full
+          pl-10               /* space for the left icon */
+          pr-10               /* space for the right arrow */
+          py-3.5
+          border border-gray-200
+          rounded-xl
+          focus:outline-none
+          focus:border-[#3b82f6]
+          focus:ring-4 focus:ring-[#3b82f6]/20
+          transition
+          appearance-none    /* hide the native arrow */
+          bg-white
+        "
+      >
+        <option value="">Choose your role</option>
+        <option value="client">User / Customer</option>
+        <option value="driver">Driver / Partner</option>
+      </select>
+
+      {/* --------------------------------------------------- */}
+      {/*   Left icon (already in your code)                 */}
+      {/* --------------------------------------------------- */}
+      <UserCheck className="absolute left-3 top-4 h-5 w-5 text-gray-400" />
+
+      {/* --------------------------------------------------- */}
+      {/*   Right‑hand dropdown arrow                        */}
+      {/* --------------------------------------------------- */}
+      <ChevronDown
+        className="
+          absolute
+          right-3 top-4          /* position inside the input */
+          h-5 w-5 text-gray-400
+          pointer-events-none   /* let clicks fall through */
+        "
+        aria-hidden="true"
+      />
+
+      {/* --------------------------------------------------- */}
+      {/*   Validation message                               */}
+      {/* --------------------------------------------------- */}
+      {errors.role && (
+        <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+      )}
+    </div>
 
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -212,8 +274,6 @@ const Signup = () => {
 };
 
 export default Signup;
-
-
 
 
 

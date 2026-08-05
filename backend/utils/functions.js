@@ -261,3 +261,17 @@ export const generateSlug = (email, firstName, lastName) => {
 // Usage Example (in controller):
 // import { hashPassword, generateToken, sendVerificationEmail } from '../utils/authUtils.js';
 // Then: const hashed = await hashPassword(req.body.password);
+
+
+
+// utils/passwordValidator.js
+export const validatePasswordStrength = (password = '') => {
+  const errors = [];
+  if (password.length < 8) errors.push('at least 8 characters');
+  if (!/[A-Z]/.test(password)) errors.push('one uppercase letter');
+  if (!/[a-z]/.test(password)) errors.push('one lowercase letter');
+  if (!/[0-9]/.test(password)) errors.push('one number');
+  if (!/[!@#$%^&*(),.?":{}|<>_\-+=[\]/~`]/.test(password)) errors.push('one special character');
+
+  return { isValid: errors.length === 0, errors };
+};

@@ -3,7 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Car, Star, Users, DollarSign, Clock, TrendingUp, AlertTriangle 
+  Car, Star, Users, DollarSign, Clock, TrendingUp, AlertTriangle, 
+  Badge,
+  Wallet
 } from 'lucide-react';
 import axios from 'axios';
 import { Share2 } from 'lucide-react';
@@ -24,6 +26,7 @@ import { PieChart } from 'lucide-react';
 import { CheckCircle } from 'lucide-react';
 import DriverUpgradeBanner from '../DriverBanner';
 import UserLocationCard from '../location/LocationCard';
+import { MdMoney } from 'react-icons/md';
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 const Overview = () => {
@@ -386,7 +389,7 @@ const labels = Array.from({ length: 30 }, (_, i) => {
   whileHover={{ y: -5 }}
   className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all"
 >
-  <DollarSign className="h-10 w-10 text-green-600 mb-3" />
+  <Wallet className="h-10 w-10 text-green-600 mb-3" />
   <p className="text-sm text-gray-600 font-medium">Total Amount Paid for You</p>
   <p className="text-3xl font-bold text-gray-900 mt-1">
     ₦{stats.totalPaidAmount?.toLocaleString() || '0'}
@@ -397,7 +400,7 @@ const labels = Array.from({ length: 30 }, (_, i) => {
             whileHover={{ y: -5 }}
             className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all"
           >
-            <DollarSign className="h-10 w-10 text-green-600 mb-3" />
+            <Wallet className="h-10 w-10 text-green-600 mb-3" />
             <p className="text-sm text-gray-600 font-medium">Your Share ({100 - stats.adminCommissionPercentage}%)</p>
             <p className="text-3xl font-bold text-gray-900 mt-1">
               ₦{driverShareAmount.toLocaleString()}
@@ -497,12 +500,12 @@ const labels = Array.from({ length: 30 }, (_, i) => {
     totalAmountSpent = 0,
     hireStatusBreakdown = { awaitingApproval: 0, active: 0 },
   } = stats;
-
+console.log(stats)
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {stats.user?.firstName || 'Client'}!
+          Welcome back
         </h1>
         <p className="text-gray-600 mt-2">Your hiring overview</p>
       </div>
@@ -524,7 +527,7 @@ const labels = Array.from({ length: 30 }, (_, i) => {
         </motion.div>
 
      <motion.div whileHover={{ y: -5 }} className="bg-white p-6 rounded-2xl shadow-lg border">
-  <DollarSign className="h-10 w-10 text-green-600 mb-2" />
+  <Wallet className="h-10 w-10 text-green-600 mb-2" />
   <p className="text-sm text-gray-600">Total Amount Paid</p>
   <p className="text-3xl font-bold">₦{stats.totalAmountPaid?.toLocaleString() || '0'}</p>
 </motion.div>

@@ -371,25 +371,26 @@ const PostCar = () => {
       </div>
 
       {/* Sticky submit bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-gray-200 px-4 py-3 sm:py-4">
-        <div className="max-w-5xl mx-auto">
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleSubmit}
-            disabled={loading || uploading}
-            className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base sm:text-lg font-bold rounded-2xl shadow-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" /> Posting Car...
-              </>
-            ) : (
-              'Post Car for Rent'
-            )}
-          </motion.button>
-        </div>
-      </div>
+  {/* Sticky submit bar */}
+<div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-gray-200 px-4 py-3 sm:py-4">
+  <div className="max-w-5xl mx-auto flex justify-center">
+    <motion.button
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={handleSubmit}
+      disabled={loading || uploading}
+      className="w-full sm:w-auto sm:min-w-[280px] px-10 py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base sm:text-lg font-bold rounded-2xl shadow-lg disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+    >
+      {loading ? (
+        <>
+          <Loader2 className="h-5 w-5 animate-spin" /> Posting Car...
+        </>
+      ) : (
+        'Post Car for Rent'
+      )}
+    </motion.button>
+  </div>
+</div>
     </div>
   );
 };

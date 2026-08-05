@@ -150,7 +150,7 @@ const AboutUs = () => {
       <section className="py-20 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
         <h2 className="text-5xl font-bold mb-8">Join the edrivers Movement</h2>
         <p className="text-2xl mb-12 max-w-4xl mx-auto">
-          Whether you're looking for a driver or want to become one — we're here to make transportation better for everyone.
+          Whether you're looking for a driver or want to become one, we're here to make transportation better for everyone.
         </p>
         <div className="flex flex-col sm:flex-row gap-8 justify-center">
           <a href="/login" className="px-12 py-6 bg-white text-blue-600 font-bold text-2xl rounded-full shadow-2xl hover:shadow-purple-500/50 transition">

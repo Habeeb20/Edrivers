@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const messages = [
   {
-    text: "Skip the stress of driver recruitment—access thousands of pre-qualified, professional drivers ready to hit the road.",
+    text: "Skip the stress of driver recruitment access thousands of pre-qualified, professional drivers ready to hit the road.",
     gradient: "from-blue-600 via-purple-600 to-pink-600",
   },
   {

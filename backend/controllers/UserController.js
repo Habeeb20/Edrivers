@@ -23,9 +23,10 @@ import Guarantor from "../models/GurantorSchema.js";
 import { getDriverCommission } from "./AdminController.js";
 import DriverProfile from "../models/driverProfile.js";
 import { sendEmail } from "../utils/sendEmail.js";
+import { validatePasswordStrength } from "../utils/functions.js";
 import { isProfileComplete, getMissingProfileFields } from "../utils/profileCompletion.js";
 const generateOtp = () => Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit
-
+const OTP_TTL_MS = 10 * 60 * 1000; 
 const walletApi = "https://api-ewallet.eroot.ng/api";
 const walletApiVirtualAcct = "https://api-ewallet.eroot.ng/api/public/dedicated-account";
 
@@ -33,6 +34,244 @@ const walletApiVirtualAcct = "https://api-ewallet.eroot.ng/api/public/dedicated-
 const generateTokenCustom = (user) => {
   return generateToken(user._id, user.role);
 };
+
+// ────────────────────────────────────────────────
+// REGISTER USER
+// ────────────────────────────────────────────────
+// export const registerUser = async (req, res) => {
+//   const { firstName, lastName, email, password, role, referralCode } = req.body;
+
+//   if (!firstName || !lastName || !email || !password || !role) {
+//     return res.status(400).json({
+//       status: false,
+//       message: "All fields (firstName, lastName, email, password, role) are required",
+//     });
+//   }
+
+//     // ── Password strength check ──
+//   const { isValid, errors } = validatePasswordStrength(password);
+//   if (!isValid) {
+//     return res.status(400).json({
+//       status: false,
+//       message: `Password must contain ${errors.join(', ')}`,
+//       passwordErrors: errors,
+//     });
+//   }
+
+
+//   try {
+//     // Check existing user
+//     const existingUser = await User.findOne({ email: email.toLowerCase() });
+//     if (existingUser) {
+//       return res.status(400).json({
+//         status: false,
+//         message: "Email already exists",
+//       });
+//     }
+
+//     // Hash password
+//     const hashedPassword = await hashPassword(password);
+
+//     // Generate unique identifiers
+//     const uniqueNumber = `RL-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+//     const userId = uuidv4();
+
+//     // Create user
+//     const newUser = new User({
+//       firstName,
+//       lastName,
+//       email: email.toLowerCase(),
+//       password: hashedPassword,
+//       role,
+//       uniqueNumber,
+//       userId,
+//       verificationStatus: role === "superadmin" ? "verified" : "unverified",
+//       status: "pending", // Changed default to pending as per your update
+//     });
+
+//       if (referralCode) {
+//       const referrer = await User.findOne({
+//         referralCode: referralCode.toUpperCase().trim(),
+//       });
+
+//       if (referrer && referrer._id.toString() !== newUser._id.toString()) {
+//         // Award points
+//         referrer.referralPoints += 50;    // ← adjust value as needed
+//         referrer.referralCount += 1;
+//         // referrer.referredUsers.push(user._id); // if using array
+
+//         await referrer.save();
+
+//         // Link the new user to referrer
+//         newUser.referredBy = referrer._id;
+//         await newUser.save();
+//       }
+//     }
+
+
+//     await newUser.save();
+
+//     // ─── External Auth System Registration (optional) ─────────────────
+//     try {
+//       await axios.post("https://auth.edirect.ng/api/auth/register", {
+//         platform: "edriver",
+//         first_name: firstName,
+//         last_name: lastName,
+//         email: email.toLowerCase(),
+//         userId,
+//         password,
+//         role,
+//       });
+//       console.log("Edirect auth registration successful");
+//     } catch (err) {
+//       console.error("Edirect auth failed:", err.response?.data || err.message);
+//     }
+
+//   // await axios.post("https://backend.ejobs.com.ng/api/v1/auth/signup"
+
+//       try {
+//       await axios.post("https://backend.ejobs.com.ng/api/v1/auth/signup", {
+     
+//         first_name: firstName,
+//         last_name: lastName,
+//         email: email.toLowerCase(),
+//         userId,
+//         password,
+//         userType: "jobSeeker",
+//         country: 'Nigeria'
+//       });
+//       console.log("Ejob registration successful");
+//     } catch (err) {
+//       console.error("Ejob registration failed:", err.response?.data || err.message);
+//     }
+
+//         // ─── External edrive registration (optional) ─────────────────
+//     try {
+//       await axios.post("https://api.edrive.ng/api/auth/register", {
+//         platform: "edrivers",
+//         first_name: firstName,
+//         last_name: lastName,
+//         email: email.toLowerCase(),
+//         userId,
+//         password,
+//         role,
+//       });
+//       console.log("Edrivers  registration successful");
+//     } catch (err) {
+//       console.error("Edirect auth failed:", err.response?.data || err.message);
+//     }
+
+//          // ─── External efixit registration (optional) ─────────────────
+//     try {
+//       await axios.post("https://backend-efixit.ereligion.ng/api/auth/register", {
+//         platform: "edrivers",
+//         first_name: firstName,
+//         last_name: lastName,
+//         email: email.toLowerCase(),
+//         userId,
+//         password,
+//         role,
+//       });
+//       console.log("Efixit registration successful");
+//     } catch (err) {
+//       console.error("Efixit auth failed:", err.response?.data || err.message);
+//     }
+
+
+
+
+//     // ─── Wallet Registration ──────────────────────────────────────────
+// // ─── Wallet Registration ──────────────────────────────────────────
+// try {
+//   const walletResponse = await axios.post(`${walletApi}/register`, {
+//     first_name: firstName,
+//     last_name: lastName,
+//     email: email.toLowerCase(),
+//     password: "edrivers123",
+//     phone: "08055446677", // Placeholder — update later via profile
+//   });
+
+//   // Always persist the full raw response, regardless of shape
+//   newUser.walletData = walletResponse.data;
+
+//   const customer = walletResponse.data?.customer;
+//   if (customer) {
+//     newUser.wallet = {
+//       ...(newUser.wallet || {}),
+//       customerCode: customer.customer_code,
+//       customerId: customer.id,
+//       currency: customer.currency,
+//     };
+//   }
+
+//   await newUser.save();
+// } catch (err) {
+//   console.error("Wallet registration failed:", err.response?.data || err.message);
+// }
+
+// // ─── Virtual Account Creation (if wallet exists) ──────────────────
+// const customerCode = newUser.walletData?.customer?.customer_code;
+// if (customerCode) {
+//   try {
+//     const virtualAcctRes = await axios.post(
+//       walletApiVirtualAcct,
+//       { customer: customerCode }
+//       // Add headers if token needed
+//     );
+
+//     // Always persist the full raw response
+//     newUser.walletResponse = virtualAcctRes.data;
+
+//     const acct = virtualAcctRes.data?.account_data;
+//     if (acct) {
+//       newUser.walletId = acct.id;
+//       newUser.wallet = {
+//         ...(newUser.wallet || {}),
+//         accountNumber: acct.account_number,
+//         accountName: acct.account_name,
+//         bankName: acct.bank_name,
+//         bankId: acct.bank_id,
+//         linkedAt: new Date(),
+//       };
+//     }
+
+//     await newUser.save();
+//   } catch (err) {
+//     console.error("Virtual account creation failed:", err.response?.data || err.message);
+//   }
+// }
+
+//     // Generate JWT for auto-login
+//     const token = generateTokenCustom(newUser);
+
+//     return res.status(201).json({
+//       status: true,
+//       message: "Registration successful! Redirecting to dashboard.",
+//       token,
+//       user: {
+//         id: newUser._id,
+//         userId: newUser.userId,
+//         firstName: newUser.firstName,
+//         lastName: newUser.lastName,
+//         email: newUser.email,
+//         role: newUser.role,
+//         uniqueNumber: newUser.uniqueNumber,
+//         walletId: newUser.walletId || null,
+//         verificationStatus: newUser.verificationStatus,
+//         status: newUser.status,
+//               referralCode:  newUser.referralCode,
+//           referralPoints:  newUser.referralPoints,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Registration error:", error);
+//     return res.status(500).json({
+//       status: false,
+//       message: "Server error. Please try again later.",
+//     });
+//   }
+// };
+
 
 // ────────────────────────────────────────────────
 // REGISTER USER
@@ -47,24 +286,29 @@ export const registerUser = async (req, res) => {
     });
   }
 
+  // ── Password strength check ──
+  const { isValid, errors } = validatePasswordStrength(password);
+  if (!isValid) {
+    return res.status(400).json({
+      status: false,
+      message: `Password must contain ${errors.join(', ')}`,
+      passwordErrors: errors,
+    });
+  }
+
   try {
-    // Check existing user
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({
-        status: false,
-        message: "Email already exists",
-      });
+      return res.status(400).json({ status: false, message: "Email already exists" });
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
-
-    // Generate unique identifiers
     const uniqueNumber = `RL-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
     const userId = uuidv4();
 
-    // Create user
+    // ── OTP for email verification ──
+    const otpCode = generateOtp();
+
     const newUser = new User({
       firstName,
       lastName,
@@ -73,31 +317,43 @@ export const registerUser = async (req, res) => {
       role,
       uniqueNumber,
       userId,
-      verificationStatus: role === "superadmin" ? "verified" : "unverified",
-      status: "pending", // Changed default to pending as per your update
+      verificationStatus: "unverified",
+      status: "pending",
+      eAuthOtp: {
+        code: otpCode,
+        expiresAt: new Date(Date.now() + OTP_TTL_MS),
+        attempts: 0,
+      },
     });
 
-      if (referralCode) {
-      const referrer = await User.findOne({
-        referralCode: referralCode.toUpperCase().trim(),
-      });
-
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode: referralCode.toUpperCase().trim() });
       if (referrer && referrer._id.toString() !== newUser._id.toString()) {
-        // Award points
-        referrer.referralPoints += 50;    // ← adjust value as needed
+        referrer.referralPoints += 50;
         referrer.referralCount += 1;
-        // referrer.referredUsers.push(user._id); // if using array
-
         await referrer.save();
-
-        // Link the new user to referrer
         newUser.referredBy = referrer._id;
-        await newUser.save();
       }
     }
 
-
     await newUser.save();
+
+    // ── Send verification email (don't block signup if this fails, but log loudly) ──
+    try {
+      await sendEmail({
+        to: newUser.email,
+        subject: "Verify your email",
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:auto">
+            <h2>Verify your email</h2>
+            <p>Hi ${firstName}, use the code below to verify your account. It expires in 10 minutes.</p>
+            <p style="font-size:32px;font-weight:bold;letter-spacing:6px">${otpCode}</p>
+          </div>
+        `,
+      });
+    } catch (err) {
+      console.error("Failed to send verification email:", err.message);
+    }
 
     // ─── External Auth System Registration (optional) ─────────────────
     try {
@@ -110,30 +366,24 @@ export const registerUser = async (req, res) => {
         password,
         role,
       });
-      console.log("Edirect auth registration successful");
     } catch (err) {
       console.error("Edirect auth failed:", err.response?.data || err.message);
     }
 
-  // await axios.post("https://backend.ejobs.com.ng/api/v1/auth/signup"
-
-      try {
+    try {
       await axios.post("https://backend.ejobs.com.ng/api/v1/auth/signup", {
-     
         first_name: firstName,
         last_name: lastName,
         email: email.toLowerCase(),
         userId,
         password,
         userType: "jobSeeker",
-        country: 'Nigeria'
+        country: "Nigeria",
       });
-      console.log("Ejob registration successful");
     } catch (err) {
       console.error("Ejob registration failed:", err.response?.data || err.message);
     }
 
-        // ─── External edrive registration (optional) ─────────────────
     try {
       await axios.post("https://api.edrive.ng/api/auth/register", {
         platform: "edrivers",
@@ -144,12 +394,10 @@ export const registerUser = async (req, res) => {
         password,
         role,
       });
-      console.log("Edrivers  registration successful");
     } catch (err) {
-      console.error("Edirect auth failed:", err.response?.data || err.message);
+      console.error("Edrive registration failed:", err.response?.data || err.message);
     }
 
-         // ─── External efixit registration (optional) ─────────────────
     try {
       await axios.post("https://backend-efixit.ereligion.ng/api/auth/register", {
         platform: "edrivers",
@@ -160,103 +408,163 @@ export const registerUser = async (req, res) => {
         password,
         role,
       });
-      console.log("Efixit registration successful");
     } catch (err) {
       console.error("Efixit auth failed:", err.response?.data || err.message);
     }
 
-
-
-
     // ─── Wallet Registration ──────────────────────────────────────────
-// ─── Wallet Registration ──────────────────────────────────────────
-try {
-  const walletResponse = await axios.post(`${walletApi}/register`, {
-    first_name: firstName,
-    last_name: lastName,
-    email: email.toLowerCase(),
-    password: "edrivers123",
-    phone: "08055446677", // Placeholder — update later via profile
-  });
+    try {
+      const walletResponse = await axios.post(`${walletApi}/register`, {
+        first_name: firstName,
+        last_name: lastName,
+        email: email.toLowerCase(),
+        password: "edrivers123",
+        phone: "08055446677",
+      });
 
-  // Always persist the full raw response, regardless of shape
-  newUser.walletData = walletResponse.data;
-
-  const customer = walletResponse.data?.customer;
-  if (customer) {
-    newUser.wallet = {
-      ...(newUser.wallet || {}),
-      customerCode: customer.customer_code,
-      customerId: customer.id,
-      currency: customer.currency,
-    };
-  }
-
-  await newUser.save();
-} catch (err) {
-  console.error("Wallet registration failed:", err.response?.data || err.message);
-}
-
-// ─── Virtual Account Creation (if wallet exists) ──────────────────
-const customerCode = newUser.walletData?.customer?.customer_code;
-if (customerCode) {
-  try {
-    const virtualAcctRes = await axios.post(
-      walletApiVirtualAcct,
-      { customer: customerCode }
-      // Add headers if token needed
-    );
-
-    // Always persist the full raw response
-    newUser.walletResponse = virtualAcctRes.data;
-
-    const acct = virtualAcctRes.data?.account_data;
-    if (acct) {
-      newUser.walletId = acct.id;
-      newUser.wallet = {
-        ...(newUser.wallet || {}),
-        accountNumber: acct.account_number,
-        accountName: acct.account_name,
-        bankName: acct.bank_name,
-        bankId: acct.bank_id,
-        linkedAt: new Date(),
-      };
+      newUser.walletData = walletResponse.data;
+      const customer = walletResponse.data?.customer;
+      if (customer) {
+        newUser.wallet = {
+          ...(newUser.wallet || {}),
+          customerCode: customer.customer_code,
+          customerId: customer.id,
+          currency: customer.currency,
+        };
+      }
+      await newUser.save();
+    } catch (err) {
+      console.error("Wallet registration failed:", err.response?.data || err.message);
     }
 
-    await newUser.save();
-  } catch (err) {
-    console.error("Virtual account creation failed:", err.response?.data || err.message);
-  }
-}
+    const customerCode = newUser.walletData?.customer?.customer_code;
+    if (customerCode) {
+      try {
+        const virtualAcctRes = await axios.post(walletApiVirtualAcct, { customer: customerCode });
+        newUser.walletResponse = virtualAcctRes.data;
+        const acct = virtualAcctRes.data?.account_data;
+        if (acct) {
+          newUser.walletId = acct.id;
+          newUser.wallet = {
+            ...(newUser.wallet || {}),
+            accountNumber: acct.account_number,
+            accountName: acct.account_name,
+            bankName: acct.bank_name,
+            bankId: acct.bank_id,
+            linkedAt: new Date(),
+          };
+        }
+        await newUser.save();
+      } catch (err) {
+        console.error("Virtual account creation failed:", err.response?.data || err.message);
+      }
+    }
 
-    // Generate JWT for auto-login
-    const token = generateTokenCustom(newUser);
-
+    // NOTE: no token issued here anymore — user must verify email first
     return res.status(201).json({
       status: true,
-      message: "Registration successful! Redirecting to dashboard.",
-      token,
-      user: {
-        id: newUser._id,
-        userId: newUser.userId,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        role: newUser.role,
-        uniqueNumber: newUser.uniqueNumber,
-        walletId: newUser.walletId || null,
-        verificationStatus: newUser.verificationStatus,
-        status: newUser.status,
-              referralCode:  newUser.referralCode,
-          referralPoints:  newUser.referralPoints,
-      },
+      message: "Account created. Please check your email for a verification code.",
+      email: newUser.email,
+      userId: newUser.userId,
     });
   } catch (error) {
     console.error("Registration error:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Server error. Please try again later.",
+    return res.status(500).json({ status: false, message: "Server error. Please try again later." });
+  }
+};
+
+// ────────────────────────────────────────────────
+// VERIFY EMAIL (OTP)
+// ────────────────────────────────────────────────
+export const verifyEmailOtp = async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ status: false, message: "Email and code are required" });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+eAuthOtp.code");
+    if (!user) {
+      return res.status(404).json({ status: false, message: "User not found" });
+    }
+    if (user.verificationStatus === "verified") {
+      return res.status(400).json({ status: false, message: "Email already verified" });
+    }
+    if (!user.eAuthOtp?.code) {
+      return res.status(400).json({ status: false, message: "No OTP found. Please request a new one." });
+    }
+    if (user.eAuthOtp.expiresAt < new Date()) {
+      return res.status(400).json({ status: false, message: "Code expired. Please request a new one." });
+    }
+    if (user.eAuthOtp.attempts >= 5) {
+      return res.status(429).json({ status: false, message: "Too many attempts. Please request a new code." });
+    }
+    if (user.eAuthOtp.code !== code) {
+      user.eAuthOtp.attempts += 1;
+      await user.save({ validateBeforeSave: false });
+      return res.status(400).json({ status: false, message: "Invalid code" });
+    }
+
+    user.verificationStatus = "verified";
+    user.eAuthOtp = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    const token = generateTokenCustom(user);
+    return res.status(200).json({
+      status: true,
+      message: "Email verified successfully!",
+      token,
+      user: {
+        id: user._id,
+        userId: user.userId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        verificationStatus: user.verificationStatus,
+      },
     });
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    return res.status(500).json({ status: false, message: "Server error" });
+  }
+};
+
+// ────────────────────────────────────────────────
+// RESEND OTP
+// ────────────────────────────────────────────────
+export const resendOtp = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ status: false, message: "Email is required" });
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) return res.status(404).json({ status: false, message: "User not found" });
+    if (user.verificationStatus === "verified") {
+      return res.status(400).json({ status: false, message: "Email already verified" });
+    }
+
+    const otpCode = generateOtp();
+    user.eAuthOtp = { code: otpCode, expiresAt: new Date(Date.now() + OTP_TTL_MS), attempts: 0 };
+    await user.save({ validateBeforeSave: false });
+
+    await sendEmail({
+      to: user.email,
+      subject: "Your new verification code",
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:auto">
+          <h2>Your new code</h2>
+          <p style="font-size:32px;font-weight:bold;letter-spacing:6px">${otpCode}</p>
+          <p>Expires in 10 minutes.</p>
+        </div>
+      `,
+    });
+
+    return res.status(200).json({ status: true, message: "A new code has been sent to your email" });
+  } catch (error) {
+    console.error("Resend OTP error:", error);
+    return res.status(500).json({ status: false, message: "Server error" });
   }
 };
 
@@ -508,7 +816,7 @@ export const requestEAuthOtp = async (req, res) => {
 
     await sendEmail({
       to: user.email,
-      subject: 'Your Job Link login code',
+      subject: 'Your edrivers login code',
       html: `<p>Hi ${user.firstName},</p><p>Your login code is:</p><h2 style="letter-spacing:4px">${code}</h2><p>This code expires in 10 minutes. If you didn't request this, ignore this email.</p>`,
       text: `Your login code is ${code}. It expires in 10 minutes.`,
     });
@@ -558,7 +866,7 @@ export const verifyEAuthOtp = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     const token = generateToken(user);
-    const isProfileComplete = computeIsProfileComplete(user); // reuse your existing helper
+    const ProfileComplete = isProfileComplete(user); // reuse your existing helper
 
     res.status(200).json({
       message: 'Login successful',
@@ -574,7 +882,7 @@ export const verifyEAuthOtp = async (req, res) => {
         referralPoints: user.referralPoints,
         isVerified: user.isVerified,
         isCertified: user.isCertified && user.currentRole === 'provider',
-        isProfileComplete,
+        ProfileComplete,
       },
     });
   } catch (error) {
@@ -762,97 +1070,6 @@ export const updateProfile = async (req, res) => {
     session.endSession();
   }
 };
-// ────────────────────────────────────────────────
-// GET DASHBOARD / OVERVIEW STATS
-// ────────────────────────────────────────────────
-// export const getDashboard = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-
-//     const user = await User.findById(userId).select("-password");
-
-//     if (!user) {
-//       return res.status(404).json({ status: false, message: "User not found" });
-//     }
-
-//     let stats = {
-//       role: user.role,
-//       totalTrips: user.totalTrips || 0,
-//       earnings: user.earnings || 0,
-//       rating: user.rating || 0,
-//     };
-
-//     if (user.role === 'driver') {
-//       // Driver stats from Hire model
-//       const hires = await Hire.find({ driver: userId });
-
-//       const totalPaidAmount = hires.reduce((sum, h) => {
-//         return h.paymentStatus === 'paid' ? sum + (h.amountOffered || 0) : sum;
-//       }, 0);
-
-//       const adminPercentage = await getDriverCommission(); // from admin controller
-//       const adminCommission = Math.round((totalPaidAmount * adminPercentage) / 100);
-//       const driverShare = totalPaidAmount - adminCommission;
-//      const totalHire = hires.filter(h => 
-//   ['accepted', 'active', 'ended'].includes(h.status)
-// ).length;
-
-// console.log(totalHire);
-
-//       const totalBookedHours = hires.reduce((sum, h) => sum + (h.durationHours || 0), 0);
-
-//       const activeHires = hires.filter(h => h.status === 'active').length;
-//       const pendingHires = hires.filter(h => h.status === 'pending' || h.status === 'pending_approval').length;
-
-//       stats = {
-//         ...stats,
-//         totalPaidAmount,
-//         totalHire,
-//         adminCommission,
-//         driverShare,
-//         totalBookedHours,
-//         activeHires,
-//         pendingHires,
-//         currentHireStatus: user.currentHireStatus || 'available',
-//       };
-//     } else if (user.role === 'client') {
-//       // Client stats
-//       const hires = await Hire.find({ client: userId });
-
-//       const totalAmountPaid = hires.reduce((sum, h) => {
-//         return h.paymentStatus === 'paid' ? sum + (h.amountOffered || 0) : sum;
-//       }, 0);
-
-//       const activeHires = hires.filter(h => h.status === 'active').length;
-//       const pendingHires = hires.filter(h => h.status === 'pending' || h.status === 'pending_approval').length;
-
-//       stats = {
-//         ...stats,
-//         totalAmountPaid,
-//         activeHires,
-//         pendingHires,
-//       };
-//     }
-
-//     return res.status(200).json({
-//       status: true,
-//       message: "Dashboard loaded",
-//       data: {
-//         user: user.toJSON(),
-//         stats,
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Dashboard error:", error);
-//     return res.status(500).json({
-//       status: false,
-//       message: "Server error",
-//     });
-//   }
-// };
-
-
-// controllers/authController.js — replace getDashboard with this
 
 export const getDashboard = async (req, res) => {
   try {
@@ -1515,142 +1732,6 @@ export const incrementDriverView = async (req, res) => {
 
 
 
-// export const getPaymentTimeline = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-
-//     const user = await User.findById(userId).select('role');
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: 'User not found' });
-//     }
-
-//     // Get admin commission % (same logic as your original)
-//     const superadmin = await User.findOne({ role: 'superadmin' })
-//       .select('adminSettings.driverCommissionPercentage');
-//     const commissionRate = (superadmin?.adminSettings?.driverCommissionPercentage ?? 30) / 100;
-
-//     const now = new Date();
-//     const periods = {
-//       today: new Date(now.setHours(0, 0, 0, 0)),
-//       thisWeek: new Date(now.setDate(now.getDate() - now.getDay())), // Sunday or Monday? adjust if needed
-//       thisMonth: new Date(now.getFullYear(), now.getMonth(), 1),
-//       thisYear: new Date(now.getFullYear(), 0, 1),
-//     };
-
-//     // Reset 'now' if you modified it above
-//     now.setTime(Date.now());
-
-//     let result = {
-//       role: user.role,
-//       periods: {},
-//     };
-
-//     if (user.role === 'driver') {
-//       // ─── Driver: Earnings (after commission) ───────────────────────────────
-//       const hires = await Hire.find({
-//         driver: userId,
-//         paymentStatus: 'paid',           // only completed & paid hires count
-//         // You can add: createdAt: { $gte: someOldDate } if you want to limit history
-//       })
-//         .select('amountOffered createdAt')
-//         .lean();
-
-//       const earnings = {
-//         today: 0,
-//         thisWeek: 0,
-//         thisMonth: 0,
-//         thisYear: 0,
-//         totalEver: 0,
-//       };
-
-//       const last30DaysDaily = new Array(30).fill(0);
-
-//       hires.forEach(hire => {
-//         const amount = hire.amountOffered || 0;
-//         const driverShare = amount * (1 - commissionRate); 
-
-//         earnings.totalEver += driverShare;
-
-//         const hireDate = new Date(hire.createdAt);
-// const daysAgo = Math.floor((now - hireDate) / (1000 * 60 * 60 * 24));
-
-//   if (daysAgo <= 29 && daysAgo >= 0) {
-//     last30DaysDaily[daysAgo] += driverShare;   
-//   }
-//         if (hireDate >= periods.today)    earnings.today += driverShare;
-//         if (hireDate >= periods.thisWeek)  earnings.thisWeek += driverShare;
-//         if (hireDate >= periods.thisMonth) earnings.thisMonth += driverShare;
-//         if (hireDate >= periods.thisYear)  earnings.thisYear += driverShare;
-//       });
-
-//       result.periods = {
-//         earnings: {
-//           today: Math.round(earnings.today),
-//           thisWeek: Math.round(earnings.thisWeek),
-//           thisMonth: Math.round(earnings.thisMonth),
-//           thisYear: Math.round(earnings.thisYear),
-//           totalEver: Math.round(earnings.totalEver),
-//           last30DaysDaily,
-//         }
-//       };
-//     } 
-//     else if (user.role === 'client') {
-//       // ─── Client: Total amount PAID ────────────────────────────────────────
-//       const hires = await Hire.find({
-//         client: userId,
-//         paymentStatus: 'paid',
-//       })
-//         .select('amountOffered createdAt')
-//         .lean();
-
-//       const paid = {
-//         today: 0,
-//         thisWeek: 0,
-//         thisMonth: 0,
-//         thisYear: 0,
-//         totalEver: 0,
-//       };
-
-//       hires.forEach(hire => {
-//         const amount = hire.amountOffered || 0;
-//         paid.totalEver += amount;
-
-//         const hireDate = new Date(hire.createdAt);
-
-//         if (hireDate >= periods.today)    paid.today += amount;
-//         if (hireDate >= periods.thisWeek)  paid.thisWeek += amount;
-//         if (hireDate >= periods.thisMonth) paid.thisMonth += amount;
-//         if (hireDate >= periods.thisYear)  paid.thisYear += amount;
-//       });
-
-//       result.periods = {
-//         paid: {
-//           today: Math.round(paid.today),
-//           thisWeek: Math.round(paid.thisWeek),
-//           thisMonth: Math.round(paid.thisMonth),
-//           thisYear: Math.round(paid.thisYear),
-//           totalEver: Math.round(paid.totalEver),
-//         }
-//       };
-//     } 
-//     else {
-//       return res.status(403).json({ success: false, message: 'Role not supported for this statistic' });
-//     }
-
-//     return res.json({
-//       success: true,
-//       data: result,
-//     });
-//   } catch (error) {
-//     console.error('getPaymentTimeline error:', error);
-//     return res.status(500).json({ success: false, message: 'Server error', error: error.message });
-//   }
-// };
-
-
-
-
-
 
 
 
@@ -1963,3 +2044,11 @@ export const searchDriversByName = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
+
+

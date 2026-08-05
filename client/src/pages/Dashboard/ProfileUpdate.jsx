@@ -757,7 +757,7 @@ const CATEGORY_OPTIONS = {
 const SectionCard = ({ icon: Icon, title, children, id }) => (
   <section
     id={id}
-    className="bg-white rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-lg border border-gray-100 p-5 sm:p-8 scroll-mt-24"
+    className="bg-white rounded-2xl sm:rounded-3xl shadow-sm sm:shadow-lg border  mb-30 border-gray-100 p-5 sm:p-8 scroll-mt-24"
   >
     <h2 className="text-lg sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8 flex items-center gap-2.5 sm:gap-3">
       <Icon className="h-5 w-5 sm:h-7 sm:w-7 text-blue-600 shrink-0" />
@@ -1428,7 +1428,7 @@ useEffect(() => {
       <div className="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-gray-200 px-4 py-3 sm:py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           <p className="hidden sm:block text-sm text-gray-500">
-            {completion}% complete — keep going!
+            {completion}% complete 
           </p>
           <motion.button
             whileHover={{ scale: 1.02 }}

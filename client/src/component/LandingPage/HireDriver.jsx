@@ -29,13 +29,13 @@ const HireDriverHero = () => {
 
           {/* Right: Text Content */}
           <div className="order-1 lg:order-2 text-center lg:text-left">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-6">
+            {/* <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-6">
               Hire a Professional Driver Today
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               Experience hassle-free travel with our vetted, licensed drivers. Safe, reliable, and always on time—your journey starts here.
-            </p>
+            </p> */}
 
             {/* Why Hire Section */}
             <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-gray-100 mb-10">
@@ -70,7 +70,7 @@ const HireDriverHero = () => {
               className="group relative inline-flex items-center px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xl rounded-full shadow-2xl hover:shadow-3xl hover:from-blue-700 hover:to-indigo-700 transform hover:scale-110 transition-all duration-300"
             >
               <span className="relative flex items-center gap-3">
-                <span className="text-2xl">🚀</span>
+                {/* <span className="text-2xl">🚀</span> */}
                 Hire Now
               </span>
             </button>

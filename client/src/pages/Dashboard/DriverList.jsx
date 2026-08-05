@@ -309,8 +309,9 @@ const fetchDriverHistory = async (driver) => {
           )
         );
       }
-      toast.success("")
+      toast.success("liked successfully")
     } catch (err) {
+      console.log(err)
       toast.error('Failed to update like');
     }
   };
@@ -561,12 +562,12 @@ const estimateETA = (distanceKm) => {
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Filter className="h-6 w-6 text-indigo-600" />
+              <Filter className="h-6 w-6 text-blue-600" />
               Filters
             </h2>
             <button
               onClick={resetFilters}
-              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
             >
               Clear All
             </button>
@@ -581,7 +582,7 @@ const estimateETA = (distanceKm) => {
                   onClick={() => selectCategory(cat)}
                   className={`px-6 py-3 rounded-full text-sm font-medium whitespace-nowrap transition-all shadow-sm ${
                     searchParams.category === cat
-                      ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-300'
+                      ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-300'
                       : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -593,7 +594,7 @@ const estimateETA = (distanceKm) => {
             <div className="flex gap-4 mt-6 justify-center md:justify-start">
             <button
               onClick={handleSearch}
-              className="flex-1 md:flex-none px-8 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-md"
+              className="flex-1 md:flex-none px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-md"
             >
               <Search size={18} />
              Search
@@ -612,7 +613,7 @@ const estimateETA = (distanceKm) => {
         {/* Drivers Grid */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
           </div>
         ) : drivers.length === 0 ? (
           <div className="text-center py-20 text-gray-600 text-xl font-medium">
@@ -627,7 +628,7 @@ const estimateETA = (distanceKm) => {
                 transition={{ type: 'spring', stiffness: 300 }}
                 className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-shadow duration-300"
               >
-                <div className="relative h-48 bg-gradient-to-br from-indigo-500 to-purple-600">
+                <div className="relative h-48 bg-gradient-to-br from-blue-500 to-blue-600">
                   <img
                     src={driver.user?.avatar || '/default-avatar.jpg'}
                     alt={`${driver.user.firstName} ${driver.user.lastName}`}
@@ -651,7 +652,7 @@ const estimateETA = (distanceKm) => {
                     {driver.categories?.slice(0, 3).map(cat => (
                       <span
                         key={cat}
-                        className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium"
+                        className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium"
                       >
                         {formatCategory(cat)}
                       </span>
@@ -660,7 +661,7 @@ const estimateETA = (distanceKm) => {
 
                   <div className="space-y-3 text-sm text-gray-700">
                     <p className="flex items-center gap-2">
-                      <MapPin size={16} className="text-red-500" />
+                      <MapPin size={16} className="text-blue-500" />
                       {driver.user?.state || driver.user?.lga || 'Location not specified'}
                     </p>
                     <p className="flex items-center gap-2">
@@ -676,8 +677,8 @@ const estimateETA = (distanceKm) => {
 
                     ) : (
                       <>
-                      <p className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-black text-xs font-semibold rounded-full">
-                      <Gauge size={16} className="text-red-600" />
+                      <p className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-black text-xs font-semibold rounded-full">
+                      <Gauge size={16} className="text-blue-600" />
                       {'Currently Unavailable'}
                     </p>
                       </>
@@ -711,7 +712,7 @@ const estimateETA = (distanceKm) => {
     </span>
   ) : (
     <>
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-800 text-xs font-semibold rounded-full">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
         Offline
       </span>
     </>
@@ -752,14 +753,14 @@ const estimateETA = (distanceKm) => {
                   <div className="flex gap-3">
              <button
     onClick={() => handleViewDetails(driver)}
-    className="flex-1 py-3 bg-indigo-50 text-indigo-700 rounded-xl font-semibold hover:bg-indigo-100 transition"
+    className="flex-1 py-3 bg-blue-50 text-blue-700 rounded-xl font-semibold hover:bg-blue-100 transition"
   >
     View Details
 
   </button>
                     <button
                       onClick={() => openHireModal(driver)}
-                      className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition"
+                      className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-blue-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition"
                     >
                       Hire Now
                     </button>
@@ -799,7 +800,7 @@ const estimateETA = (distanceKm) => {
       </button>
 
       {/* ===== Hero Header ===== */}
-      <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 px-6 pt-10 pb-16 sm:rounded-t-3xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-blue-600 via-blue-600 to-blue-600 px-6 pt-10 pb-16 sm:rounded-t-3xl relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,white,transparent_60%)]" />
         <div className="relative text-center">
           <img
@@ -841,7 +842,7 @@ const estimateETA = (distanceKm) => {
             </p>
           </div>
           <div className="p-4 text-center col-span-2 sm:col-span-1">
-            <Globe className="h-5 w-5 text-indigo-600 mx-auto mb-1" />
+            <Globe className="h-5 w-5 text-blue-600 mx-auto mb-1" />
             <p className="text-xs text-gray-500">Interstate</p>
             <p className="font-semibold text-gray-900 text-sm">
               {selectedProfile?.travelCapabilities?.interstate ? 'Available' : 'No'}
@@ -906,19 +907,19 @@ const estimateETA = (distanceKm) => {
 
             <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
               <h3 className="text-base font-bold mb-3 flex items-center gap-2 text-gray-900">
-                <Globe className="h-5 w-5 text-indigo-600" /> Travel Capabilities
+                <Globe className="h-5 w-5 text-blue-600" /> Travel Capabilities
               </h3>
               <div className="space-y-1.5 text-sm text-gray-700">
                 <p className="flex items-center gap-2">
                   {selectedProfile.travelCapabilities?.interstate
                     ? <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    : <X className="h-4 w-4 text-red-400" />}
+                    : <X className="h-4 w-4 text-blue-400" />}
                   Interstate
                 </p>
                 <p className="flex items-center gap-2">
                   {selectedProfile.travelCapabilities?.international
                     ? <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    : <X className="h-4 w-4 text-red-400" />}
+                    : <X className="h-4 w-4 text-blue-400" />}
                   International
                 </p>
                 {selectedProfile.travelCapabilities?.travelNotes && (
@@ -1005,7 +1006,7 @@ const estimateETA = (distanceKm) => {
             setShowDetailsModal(false);
             openHireModal(selectedDriver);
           }}
-          className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-base sm:text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+          className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700 text-white text-base sm:text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
         >
           Hire This Driver
         </button>
@@ -1036,12 +1037,12 @@ const estimateETA = (distanceKm) => {
               {/* Category */}
               <div>
                 <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <List className="h-6 w-6 text-indigo-600" /> Service Category
+                  <List className="h-6 w-6 text-blue-600" /> Service Category
                 </label>
                 <select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition bg-white text-base"
+                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition bg-white text-base"
                   required
                 >
                   <option value="">Select service type...</option>
@@ -1056,16 +1057,16 @@ const estimateETA = (distanceKm) => {
               {/* category price grid*/}
          {/* category price grid */}
 {selectedCategoryPricing ? (
-  <div className="mt-5 p-6 bg-white rounded-2xl shadow-md border border-indigo-100">
-    <h4 className="text-lg font-bold text-indigo-700 mb-5 text-center">
+  <div className="mt-5 p-6 bg-white rounded-2xl shadow-md border border-blue-100">
+    <h4 className="text-lg font-bold text-blue-700 mb-5 text-center">
       Current Rates – {formatCategory(form.category)}
     </h4>
 
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div className="flex flex-col items-center p-4 bg-indigo-50 rounded-xl">
-        <Clock className="h-6 w-6 text-indigo-600 mb-2" />
+      <div className="flex flex-col items-center p-4 bg-blue-50 rounded-xl">
+        <Clock className="h-6 w-6 text-blue-600 mb-2" />
         <span className="text-xs text-gray-600">per hour</span>
-        <span className="text-xl font-bold text-indigo-800 mt-1">
+        <span className="text-xl font-bold text-blue-800 mt-1">
           ₦{(selectedCategoryPricing.hourlyRate || 0).toLocaleString()}
         </span>
       </div>
@@ -1078,10 +1079,10 @@ const estimateETA = (distanceKm) => {
         </span>
       </div>
 
-      <div className="flex flex-col items-center p-4 bg-purple-50 rounded-xl">
-        <CalendarIcon className="h-6 w-6 text-purple-600 mb-2" />
+      <div className="flex flex-col items-center p-4 bg-blue-50 rounded-xl">
+        <CalendarIcon className="h-6 w-6 text-blue-600 mb-2" />
         <span className="text-xs text-gray-600">per week</span>
-        <span className="text-xl font-bold text-purple-800 mt-1">
+        <span className="text-xl font-bold text-blue-800 mt-1">
           ₦{(selectedCategoryPricing.weeklyRate || 0).toLocaleString()}
         </span>
       </div>
@@ -1096,7 +1097,7 @@ const estimateETA = (distanceKm) => {
     </div>
 
 <h4 className='pt-5 ml-5 font-bold text-black'>
-  call out charge:<span className='text-red-600 pl-2 text-2xl'>
+  call out charge:<span className='text-blue-600 pl-2 text-2xl'>
 ₦{(selectedCategoryPricing.callOutCharge || 0).toLocaleString()}
 </span>
 </h4>
@@ -1133,7 +1134,7 @@ const estimateETA = (distanceKm) => {
 
               <div>
   <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-    <DollarSign className="h-6 w-6 text-green-600" /> Negotiate (₦)
+    <DollarSign className="h-6 w-6 text-blue-600" /> Negotiate (₦)
   </label>
   <input
     type="number"
@@ -1184,19 +1185,19 @@ const estimateETA = (distanceKm) => {
               {/* Address */}
               <div>
                 <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <MapPin className="h-6 w-6 text-red-600" /> Pickup Address
+                  <MapPin className="h-6 w-6 text-blue-600" /> Pickup Address
                 </label>
      
-      <input
+      {/* <input
         type="text"
         placeholder="Enter pickup address"
         className="w-full p-3 border rounded-lg text-sm focus:ring-2 focus:ring-customGreen"
         value={form.address}
         onChange={(e) => setForm({ ...form, address: e.target.value })}
         required
-      />
+      /> */}
   
-                {/* <Autocomplete
+                <Autocomplete
       onLoad={(autoComplete) => {
         // optional: store ref
       }}
@@ -1216,12 +1217,12 @@ const estimateETA = (distanceKm) => {
         onChange={(e) => setForm({ ...form, address: e.target.value })}
         required
       />
-    </Autocomplete> */}
+    </Autocomplete>
           
               </div>
               <div>
                 <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Calendar1 className="h-6 w-6 text-red-600" />Description(Why do you want to hire a driver)
+                  <Calendar1 className="h-6 w-6 text-blue-600" />Description(Why do you want to hire a driver)
                 </label>
                    <input
                   type="texr"
@@ -1236,7 +1237,7 @@ const estimateETA = (distanceKm) => {
              
               <div>
                 <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Calendar1 className="h-6 w-6 text-red-600" />Date
+                  <Calendar1 className="h-6 w-6 text-blue-600" />Date
                 </label>
                    <input
                   type="date"
@@ -1252,7 +1253,7 @@ const estimateETA = (distanceKm) => {
 
                  <div>
                 <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Clock1 className="h-6 w-6 text-red-600" />Time
+                  <Clock1 className="h-6 w-6 text-blue-600" />Time
                 </label>
                    <input
                   type="time"
@@ -1275,7 +1276,7 @@ const estimateETA = (distanceKm) => {
                   className="w-6 h-6 text-blue-600 rounded focus:ring-blue-500"
                 />
                 <label htmlFor="accommodation" className="text-lg font-medium flex items-center gap-3 cursor-pointer">
-                  <Home className="h-6 w-6 text-purple-600" />
+                  <Home className="h-6 w-6 text-blue-600" />
                   Provide Accommodation
                 </label>
               </div>
@@ -1468,15 +1469,15 @@ const estimateETA = (distanceKm) => {
       className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[94vh] overflow-hidden flex flex-col"
     >
       {/* Header */}
-      <div className="p-6 border-b bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-t-3xl">
+      <div className="p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-3xl">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">Hire History</h2>
-            <p className="text-indigo-100 mt-1">
+            <p className="text-blue-100 mt-1">
               {selectedHistoryDriver.user?.firstName} {selectedHistoryDriver.user?.lastName}
             </p>
 
-            <p className="text-indigo-100 text-sm mt-1 font-medium">
+            <p className="text-blue-100 text-sm mt-1 font-medium">
         {driverHistory.filter(h => h.status === 'ended').length} trips completed
       </p>
           </div>
@@ -1493,7 +1494,7 @@ const estimateETA = (distanceKm) => {
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {historyLoading ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <Loader2 className="h-12 w-12 animate-spin text-indigo-600 mb-4" />
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
             <p className="text-gray-500">Loading hire records...</p>
           </div>
         ) : driverHistory.length === 0 ? (
@@ -1579,7 +1580,7 @@ const estimateETA = (distanceKm) => {
                       ? 'text-green-600' 
                       : hire.paymentStatus === 'pending' 
                         ? 'text-amber-600' 
-                        : 'text-red-600'
+                        : 'text-blue-600'
                   }`}>
                     {hire.paymentStatus}
                   </p>
@@ -1616,7 +1617,7 @@ const estimateETA = (distanceKm) => {
 
                 {hire.endedEarly && (
                   <div className="col-span-full">
-                    <span className="text-red-600 font-medium">Ended Early</span>
+                    <span className="text-blue-600 font-medium">Ended Early</span>
                     {hire.endReason && <p className="text-gray-600 mt-1">{hire.endReason}</p>}
                   </div>
                 )}

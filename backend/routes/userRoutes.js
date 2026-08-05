@@ -29,6 +29,8 @@ import {
   searchDriversByName,
   requestEAuthOtp,
   verifyEAuthOtp,
+  verifyEmailOtp,
+  resendOtp,
 } from "../controllers/UserController.js";  // ← updated controller name
 import { protect } from "../middleware/verifyToken.js";
 import { subscribeToPlan } from "../controllers/DriverProfileController.js";
@@ -37,6 +39,8 @@ const router = express.Router();
 
 // Public routes (no auth needed)
 router.post("/register", registerUser);
+router.post('/verify-email', verifyEmailOtp);
+router.post('/resend-otp', resendOtp);
 router.post("/login", loginUser);
 router.post("/authlogin", authLogin)
 router.post("/forgot-password", forgotPassword);
