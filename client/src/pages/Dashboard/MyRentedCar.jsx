@@ -107,13 +107,13 @@ export default function MyRentedCars() {
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-10 text-center">
           <Car className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-4 text-lg font-medium text-gray-900">No rentals yet</h3>
-          <p className="mt-2 text-gray-600">When you rent a car, it will appear here.</p>
-       <Link
+          <p className="mt-2 text-gray-600">click on rent a car tab to rent your car.</p>
+       {/* <Link
   to="/dashboard?tab=postcar"
   className="mt-6 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
 >
   Rent your car
-</Link>
+</Link> */}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">

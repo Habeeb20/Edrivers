@@ -144,19 +144,43 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin, Clock, AlertCircle, Loader2 } from 'lucide-react';
-import { searchGeocode, fetchRoute, fetchDistance, decodePolyline} from '../utils/geoapi';
+import { searchGeocode, fetchRoute, fetchDistance, fetchLgaCenter, decodePolyline } from '../utils/geoapi';
 
-
-
-const buildAddress = (parts) => {
+// Resolves a location from address parts, preferring the most reliable
+// method available:
+// 1. If there's a specific street address, try free-text search on that
+//    (searchGeocode is autocomplete — works best on a single specific place
+//    name, not a comma-joined "address, lga, state, country" string).
+// 2. Otherwise (or if that fails), fall back to the LGA's structured center
+//    lookup — a direct DB match, not fuzzy search, so it's reliable for
+//    "just state + LGA" cases like most seller profiles.
+const resolveLocationPoint = async (parts) => {
   if (!parts) return null;
-  const partsArray = [
-    parts.address || '',
-    parts.lga || '',
-    parts.state || '',
-    parts.country || 'Nigeria',
-  ].filter(Boolean);
-  return partsArray.join(', ') || null;
+
+  const hasSpecificAddress = Boolean(parts.address && parts.address.trim());
+
+  if (hasSpecificAddress) {
+    try {
+      return await searchGeocode(parts.address.trim());
+    } catch {
+      // fall through to LGA center below
+    }
+  }
+
+  if (parts.lga && parts.lga.trim()) {
+    try {
+      return await fetchLgaCenter(parts.lga.trim());
+    } catch {
+      // fall through to null below
+    }
+  }
+
+  return null;
+};
+
+const hasUsableParts = (parts) => {
+  if (!parts) return false;
+  return Boolean((parts.address && parts.address.trim()) || (parts.lga && parts.lga.trim()));
 };
 
 const makeDotIcon = (color) =>
@@ -189,6 +213,32 @@ function FitBounds({ points }) {
   return null;
 }
 
+// Wraps navigator.geolocation in a promise, with sane options
+const getBrowserLocation = () =>
+  new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation is not supported by your browser'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (err) => reject(err),
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      }
+    );
+  });
+
+// providerAddressParts: { address, lga, state, country }.
+// clientAddressParts is OPTIONAL — if omitted (or has no address/lga),
+// the browser's live geolocation is used as the client point instead.
 const DistanceInfo = ({ clientAddressParts, providerAddressParts }) => {
   const [clientCoords, setClientCoords] = useState(null);
   const [providerCoords, setProviderCoords] = useState(null);
@@ -198,6 +248,7 @@ const DistanceInfo = ({ clientAddressParts, providerAddressParts }) => {
   const [durationText, setDurationText] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [locationDenied, setLocationDenied] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -205,12 +256,9 @@ const DistanceInfo = ({ clientAddressParts, providerAddressParts }) => {
     const run = async () => {
       setLoading(true);
       setError(null);
+      setLocationDenied(false);
 
-      const originQuery = buildAddress(clientAddressParts);
-      const destQuery = buildAddress(providerAddressParts);
-console.log(originQuery)
-console.log(destQuery)
-      if (!originQuery || !destQuery) {
+      if (!hasUsableParts(providerAddressParts)) {
         if (!cancelled) {
           setError('Location details not available');
           setLoading(false);
@@ -219,12 +267,45 @@ console.log(destQuery)
       }
 
       try {
-        // Geocode both addresses in parallel (replaces Google Geocoding)
-        const [origin, destination] = await Promise.all([
-          searchGeocode(originQuery),
-          searchGeocode(destQuery),
-        ]);
+        // ── Resolve the client/origin point ──
+        let origin;
+
+        if (hasUsableParts(clientAddressParts)) {
+          origin = await resolveLocationPoint(clientAddressParts);
+        }
+
+        if (!origin) {
+          try {
+            origin = await getBrowserLocation();
+          } catch (geoErr) {
+            if (!cancelled) {
+              if (geoErr.code === 1) {
+                setLocationDenied(true);
+                setError('Location access denied — please allow location or update your address in profile');
+              } else {
+                setError('Unable to get your current location');
+              }
+              setLoading(false);
+            }
+            return;
+          }
+        }
+
         if (cancelled) return;
+
+        // ── Resolve the provider/destination point ──
+        const destination = await resolveLocationPoint(providerAddressParts);
+
+        if (!destination) {
+          if (!cancelled) {
+            setError('Could not locate the provider\'s address');
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (cancelled) return;
+
         setClientCoords(origin);
         setProviderCoords(destination);
 
@@ -237,7 +318,6 @@ console.log(destQuery)
           setDurationText(route.duration_text ?? null);
           setRoutePath(route.polyline ? decodePolyline(route.polyline) : null);
         } catch {
-          // Fall back to straight-line distance from the API
           const dist = await fetchDistance(origin.lat, origin.lng, destination.lat, destination.lng);
           if (cancelled) return;
           setDistanceKm(dist.distance_km ?? null);
@@ -279,14 +359,18 @@ console.log(destQuery)
         {loading ? (
           <div className="h-80 md:h-96 flex items-center justify-center bg-gray-50">
             <Loader2 className="h-10 w-10 animate-spin text-indigo-600 mr-3" />
-            <span className="text-lg text-gray-700">Loading route map...</span>
+            <span className="text-lg text-gray-700">
+              {locationDenied ? 'Waiting for location...' : 'Loading route map...'}
+            </span>
           </div>
         ) : error ? (
           <div className="h-80 md:h-96 flex flex-col items-center justify-center bg-red-50 p-6 text-center">
             <AlertCircle className="h-12 w-12 text-red-600 mb-4" />
             <p className="text-lg font-medium text-red-800">{error}</p>
             <p className="text-sm text-red-700 mt-2">
-              Please update your address or driver's location in profile
+              {locationDenied
+                ? 'Enable location access in your browser settings, or add your address in profile'
+                : "Please update your address or driver's location in profile"}
             </p>
           </div>
         ) : (
@@ -306,7 +390,7 @@ console.log(destQuery)
 
               {clientCoords && (
                 <Marker position={[clientCoords.lat, clientCoords.lng]} icon={clientIcon}>
-                  <Popup>Client Location</Popup>
+                  <Popup>Your Location</Popup>
                 </Marker>
               )}
               {providerCoords && (

@@ -270,6 +270,8 @@ router.get('/search', async (req, res) => {
           id: user._id,
           firstName: user.firstName,
           lastName: user.lastName,
+            lga:user.lga,
+                 state:user.state,
           fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
           phone: user.phone,
           avatar: user.avatar,
@@ -282,12 +284,12 @@ router.get('/search', async (req, res) => {
           location: user.location,
           status: user.status,
           shares: user.shares,
-          state:user.state,
+     
           lastSeen: user.lastSeen,
           lastActivity: user.lastActivity,
           isOnline: user.isOnline,
           isAvailable: user.isAvailable,
-          lga:user.lga,
+        
           likes:user.likes,
           views: user.views,
           createdAt: user.createdAt,

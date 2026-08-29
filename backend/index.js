@@ -141,7 +141,7 @@ app.get('/api/geocode', async (req, res) => {
 
 
 
-const port = process.env.PORT || 1080;
+const port = process.env.PORT || 2022;
 
 app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);

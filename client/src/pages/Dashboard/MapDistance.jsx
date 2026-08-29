@@ -508,7 +508,7 @@ const isMyMessage = (sender) => {
             animate={{ scale: 1 }}
             className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8"
           >
-            <h3 className="text-2xl font-bold mb-4 text-center">End Hire Early?</h3>
+            <h3 className="text-2xl font-bold mb-4 text-center">Closing booking?</h3>
             <p className="text-gray-600 text-center mb-6">
               Are you sure you want to end the hire with {selectedHire.driver.firstName}?
             </p>

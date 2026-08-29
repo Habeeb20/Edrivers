@@ -1213,7 +1213,7 @@ const MyHires = () => {
       {showEndModal && selectedRequest && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">End Hire Early?</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Close booking?</h3>
             <p className="text-sm text-gray-500 mb-5">Are you sure you want to end this hire?</p>
             <textarea
               value={endReason}

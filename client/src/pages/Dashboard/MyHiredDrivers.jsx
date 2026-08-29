@@ -1415,7 +1415,7 @@ useEffect(() => {
       {showEndModal && selectedHire && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">End Hire Early?</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Close booking?</h3>
             <p className="text-sm text-gray-500 text-center mb-5">
               Are you sure you want to end the hire with {selectedHire.driver?.firstName}?
             </p>

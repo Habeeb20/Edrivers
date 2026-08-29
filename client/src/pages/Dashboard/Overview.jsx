@@ -94,6 +94,24 @@ const [hireCount, setHireCount] =useState(null)
     fetchStats();
   }, [token]);
 
+
+  // Compact currency formatter — 700000 → "700K", 7000000 → "7M", 1200000000 → "1.2B"
+const formatCompactNaira = (value = 0) => {
+  const num = Number(value) || 0;
+  const abs = Math.abs(num);
+
+  if (abs >= 1_000_000_000) {
+    return `₦${(num / 1_000_000_000).toFixed(abs % 1_000_000_000 === 0 ? 0 : 1)}B`;
+  }
+  if (abs >= 1_000_000) {
+    return `₦${(num / 1_000_000).toFixed(abs % 1_000_000 === 0 ? 0 : 1)}M`;
+  }
+  if (abs >= 1_000) {
+    return `₦${(num / 1_000).toFixed(abs % 1_000 === 0 ? 0 : 1)}K`;
+  }
+  return `₦${num.toLocaleString()}`;
+};
+
   const referralLink = details?.referralCode
     ? `${window.location.origin}/signup?ref=${details.referralCode}`
     : null;
@@ -200,25 +218,26 @@ const [hireCount, setHireCount] =useState(null)
   { label: "This Year", value: data.thisYear, color: "bg-gray-50 border-gray-200 text-gray-800" },
 ];
 
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-5 mt-8">
-        {periods.map((p, i) => (
-          <motion.div
-            key={p.label}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * i }}
-            className={`p-5 rounded-2xl shadow-sm border ${p.color}`}
-          >
-            <p className="text-sm font-medium opacity-80">{p.label}</p>
-            <p className="text-2xl font-bold mt-1">
-              ₦{(p.value || 0).toLocaleString()}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-    );
-  };
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-5 mt-8">
+      {periods.map((p, i) => (
+        <motion.div
+          key={p.label}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 * i }}
+          className={`p-5 rounded-2xl shadow-sm border ${p.color}`}
+          title={`₦${(p.value || 0).toLocaleString()}`}
+        >
+          <p className="text-sm font-medium opacity-80">{p.label}</p>
+          <p className="text-2xl font-bold mt-1 truncate">
+            {formatCompactNaira(p.value)}
+          </p>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
 
   // ─── Last 30 Days Trend Chart (simple daily bars) ──────────────────────
   const renderLast30DaysTrend = () => {
@@ -391,9 +410,10 @@ const labels = Array.from({ length: 30 }, (_, i) => {
 >
   <Wallet className="h-10 w-10 text-green-600 mb-3" />
   <p className="text-sm text-gray-600 font-medium">Total Amount Paid for You</p>
-  <p className="text-3xl font-bold text-gray-900 mt-1">
-    ₦{stats.totalPaidAmount?.toLocaleString() || '0'}
-  </p>
+  <p className="text-3xl font-bold text-gray-900 mt-1" title={`₦${(stats.totalPaidAmount || 0).toLocaleString()}`}>
+  {formatCompactNaira(stats.totalPaidAmount)}
+</p>
+ 
 </motion.div>
 
           <motion.div 
@@ -581,6 +601,7 @@ console.log(stats)
 };
 
 export default Overview;
+
 
 
 

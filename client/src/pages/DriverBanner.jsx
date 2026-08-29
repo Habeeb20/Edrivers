@@ -26,9 +26,9 @@ const DriverUpgradeBanner = () => {
               Boost Your Driver Opportunities 🚗
             </h3>
             <p className="text-sm text-white/90 max-w-xl">
-              Keep your driver profile updated and get <span className="font-semibold">certified & verified</span>. 
+              Keep your user profile and driver profile updated and get <span className="font-semibold">certified & verified</span>. 
               Verified drivers receive more client trust and higher hiring opportunities.
-              Visit <span className="font-semibold">Essential NG</span> to complete your verification.
+              {/* Visit <span className="font-semibold">Essential NG</span> to complete your verification. */}
             </p>
 
             {/* Benefits */}

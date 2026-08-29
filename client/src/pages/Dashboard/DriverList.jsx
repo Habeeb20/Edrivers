@@ -16,8 +16,10 @@ import DistanceInfo from "../DistanceMap"
 import { useUserLocation } from '../location/UserLocation';
 import { getProviderCoords } from '../../utils/GeocodeAddress';
 import { useRef } from 'react'; // add to existing react import
-import { searchGeocode,fetchRoute, fetchDistance } from '../../utils/geoapi';
 
+import { timeAgo, formatJoinDate } from '../../utils/formatTime';
+
+import { fetchRoute, fetchDistance, fetchLgaCenter, searchGeocode } from '../../utils/geoapi';
 const formatCategory = (cat) =>
   cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
@@ -469,11 +471,51 @@ useEffect(() => {
     setForm({ ...form, amountOffered: value });
   };
 
+const resolveDriverLocation = async (address, lga) => {
+  if (address && address.trim()) {
+    try {
+      return await searchGeocode(address.trim());
+    } catch {
+      // fall through to LGA center
+    }
+  }
+  if (lga && lga.trim()) {
+    try {
+      return await fetchLgaCenter(lga.trim());
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
 
-    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+// Wraps navigator.geolocation in a promise — same as DistanceInfo
+const getBrowserLocation = () =>
+  new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation is not supported by your browser'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (err) => reject(err),
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      }
+    );
+  });
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
   if (!lat1 || !lon1 || !lat2 || !lon2) return null;
 
-  const R = 6371; // Earth radius in km
+  const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
 
@@ -486,66 +528,133 @@ useEffect(() => {
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  return (R * c).toFixed(1); // km
+  return R * c;
 };
-
 
 useEffect(() => {
-  if (!drivers.length || !userLat || !userLng) return;
+  if (!drivers.length) return;
 
-const computeDistances = async () => {
-  const results = {};
-  const locationMap = {};
+  let cancelled = false;
 
-  const uniqueLocations = [
-    ...new Set(
-      drivers.map(d => d.user?.lga || d.user?.state).filter(Boolean)
-    )
-  ];
-
-  console.log("Unique locations:", uniqueLocations);
-
-  for (const loc of uniqueLocations) {
-    const geo = await getProviderCoords(loc);
-    console.log("Geo for", loc, geo);
-
-    locationMap[loc] = geo;
-
-    await new Promise(res => setTimeout(res, 1000)); // rate limit safety
-  }
-
-  for (const driver of drivers) {
-    const loc = driver.user?.lga || driver.user?.state;
-    const coords = locationMap[loc];
-
-    if (coords) {
-      results[driver._id] = calculateDistance(
-        userLat,
-        userLng,
-        coords.lat,
-        coords.lng
-      );
+  const computeDistances = async () => {
+    // ── Get the user's real current location from the browser ──
+    let originLat, originLng;
+    try {
+      const origin = await getBrowserLocation();
+      if (cancelled) return;
+      originLat = origin.lat;
+      originLng = origin.lng;
+    } catch (err) {
+      console.error('Could not get browser location:', err);
+      if (!cancelled) setDistances({});
+      return; // no reliable origin — don't compute anything wrong
     }
-  }
 
-  console.log("Final distances:", results);
+    const results = {};
+    const locationMap = {}; // cache for geocoded LGA/state fallbacks
 
-  setDistances(results);
-};
+    const driversNeedingGeocode = drivers.filter((d) => {
+      const coords = d.user?.location?.coordinates;
+      const hasValidCoords =
+        Array.isArray(coords) &&
+        coords.length === 2 &&
+        coords[0] !== 0 &&
+        coords[1] !== 0;
+      return !hasValidCoords;
+    });
+
+    const uniqueLocations = [
+      ...new Set(
+        driversNeedingGeocode
+          .map((d) => d.user?.lga || d.user?.state)
+          .filter(Boolean)
+      ),
+    ];
+
+    // Resolve each unique LGA/state once, via the structured lookup
+    for (const loc of uniqueLocations) {
+      try {
+        const geo = await resolveDriverLocation(null, loc);
+        locationMap[loc] = geo;
+      } catch (err) {
+        console.error('Geocode failed for', loc, err);
+        locationMap[loc] = null;
+      }
+      await new Promise((res) => setTimeout(res, 1000));
+    }
+
+    if (cancelled) return;
+
+    for (const driver of drivers) {
+      const driverId = driver.user?.id;
+      if (!driverId) continue;
+
+      const coords = driver.user?.location?.coordinates;
+      const hasValidCoords =
+        Array.isArray(coords) &&
+        coords.length === 2 &&
+        coords[0] !== 0 &&
+        coords[1] !== 0;
+
+      let lat, lng;
+
+      if (hasValidCoords) {
+        // GeoJSON order is [longitude, latitude]
+        [lng, lat] = coords;
+      } else {
+        const loc = driver.user?.lga || driver.user?.state;
+        const geo = locationMap[loc];
+        if (geo) {
+          lat = geo.lat;
+          lng = geo.lng;
+        }
+      }
+
+      if (lat == null || lng == null) continue;
+
+      try {
+        const route = await fetchRoute(originLat, originLng, lat, lng);
+        if (route?.distance_km != null) {
+          results[driverId] = {
+            km: route.distance_km,
+            minutes: route.duration_minutes ?? null,
+          };
+        } else {
+          throw new Error('No route data');
+        }
+      } catch {
+        try {
+          const dist = await fetchDistance(originLat, originLng, lat, lng);
+          results[driverId] = {
+            km: dist.distance_km ?? calculateDistance(originLat, originLng, lat, lng),
+            minutes: dist.duration_minutes ?? null,
+          };
+        } catch {
+          const km = calculateDistance(originLat, originLng, lat, lng);
+          if (typeof km === 'number' && !isNaN(km)) {
+            results[driverId] = { km, minutes: null };
+          }
+        }
+      }
+
+      await new Promise((res) => setTimeout(res, 300));
+    }
+
+    if (!cancelled) {
+      setDistances(results);
+    }
+  };
+
   computeDistances();
-}, [drivers, userLat, userLng]);
+  return () => {
+    cancelled = true;
+  };
+}, [drivers]);
 
 const estimateETA = (distanceKm) => {
-  const avgSpeed = 40; // km/h (city driving)
-
-  const timeHours = distanceKm / avgSpeed;
-  const timeMinutes = timeHours * 60;
-
-  return Math.round(timeMinutes);
+  const avgSpeed = 40;
+  return Math.round((distanceKm / avgSpeed) * 60);
 };
-
-
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -683,18 +792,22 @@ const estimateETA = (distanceKm) => {
                     </p>
                       </>
                     )}
-                    <p className="flex items-center gap-2">
-                      <Gauge size={16} className="text-green-600" />
-                      Last Seen:{new Date(driver.user?.lastSeen).toLocaleString() || '?'}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Gauge size={16} className="text-green-600" />
-                      Joined:{new Date(driver.user?.createdAt).toLocaleString() || '?'}
-                    </p>
+                <p className="flex items-center gap-2">
+  <Gauge size={16} className="text-green-600" />
+  Last Seen: {timeAgo(driver.user?.lastSeen)}
+</p>
+<p className="flex items-center gap-2">
+  <Gauge size={16} className="text-green-600" />
+  Joined: {formatJoinDate(driver.user?.createdAt)}
+</p>
                     {/* <DistanceAndTime /> */}
-                     <p>
-  📍 {distances[driver.user._id]
-    ? `${distances[driver.user._id]} km away • ${estimateETA(distances[driver.user._id])} min away`
+<p>
+  📍 {distances[driver.user.id]
+    ? `${distances[driver.user.id].km.toFixed(1)} km away • ${
+        distances[driver.user.id].minutes != null
+          ? distances[driver.user.id].minutes
+          : estimateETA(distances[driver.user.id].km)
+      } min away`
     : "Calculating distance..."}
 </p>
                   </div>
@@ -815,10 +928,10 @@ const estimateETA = (distanceKm) => {
             <MapPin className="h-4 w-4" />
             {selectedDriver.user?.lga}{selectedDriver.user?.state ? `, ${selectedDriver.user.state}` : ''}
           </p>
-          <div className="inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 bg-white/15 backdrop-blur rounded-full text-white text-sm font-medium">
+          {/* <div className="inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 bg-white/15 backdrop-blur rounded-full text-white text-sm font-medium">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
             {selectedDriver.user?.rating || '5.0'} Rating
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -1661,6 +1774,18 @@ const estimateETA = (distanceKm) => {
 };
 
 export default DriversList;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
