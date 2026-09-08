@@ -1,300 +1,3 @@
-// /* eslint-disable no-unused-vars */
-// // src/pages/Dashboard/DriverProfileUpdate.jsx
-// import React, { useState, useEffect } from 'react';
-// import { useForm } from 'react-hook-form';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { toast } from 'sonner';
-// import { motion } from 'framer-motion';
-// import { Car, DollarSign, Globe, Languages, Gauge, Calendar, MapPin, CheckCircle } from 'lucide-react';
-// import axios from 'axios';
-
-// const PRIMARY_500 = '#3B82F6';
-
-// const DRIVER_CATEGORIES = [
-//   'full-time', 'part-time', 'weekend', 'short-time', 'airport-pickup',
-//   'outstation-travel', 'night-out-designated', 'executive-chauffeur',
-//   'family-child-friendly', 'school-bus', 'tanker-hazmat', 'retained-monthly', 'pet-friendly', 'truck-driver', 'interstate-driver', 'long-haul-driver', 'delivery-driver',
-//   'disabled-assistance-driver', 'bike-courier', 'medical-transport-driver', ,
-// 'chauffeur-driver', 'personal-driver', 'corporate-driver'
-// ];
-
-// const TRANSMISSIONS = ['automatic', 'manual', 'both'];
-// const LANGUAGES = ['English', 'Spanish', 'French', 'Hindi', 'Arabic', 'Mandarin', 'Yoruba', 'Igbo', 'Hausa', 'Portuguese'];
-
-// const DriverProfileUpdate = () => {
-
-// const token = localStorage.getItem("token")
-//   const dispatch = useDispatch();
-//   const { user } = useSelector(state => state.user);
-//   const [loading, setLoading] = useState(false);
-//   const [profile, setProfile] = useState(null);
-
-//   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
-
-//   // Fetch driver profile on mount
-//   useEffect(() => {
-//       const token = localStorage.getItem("token")
-//     const fetchProfile = async () => {
-//       try {
-//         console.log(token)
-//         const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/driver/profile`, {
-//             headers: {
-//                 'Authorization': `Bearer ${token}`
-//             }
-//         });
-//         setProfile(res.data.profile);
-//         console.log(res.data)
-//         // Pre-fill form
-//         setValue('categories', res.data.profile?.categories || []);
-//         setValue('expectedEarnings.min', res.data.profile?.expectedEarnings?.min || '');
-//         setValue('expectedEarnings.max', res.data.profile?.expectedEarnings?.max || '');
-//         setValue('yearsOfExperience', res.data.profile?.yearsOfExperience || '');
-// // In your fetchProfile function, inside try block:
-// const profileData = res.data?.profile || {};
-
-// // Safest way – guarantees array even if backend sends null/undefined/string
-// setValue('transmission', Array.isArray(profileData.transmission) ? profileData.transmission : []);
-// setValue('languagesSpoken', Array.isArray(profileData.languagesSpoken) ? profileData.languagesSpoken : []);
-//         setValue('travelCapabilities.interstate', res.data.profile?.travelCapabilities?.interstate || false);
-//         setValue('travelCapabilities.international', res.data.profile?.travelCapabilities?.international || false);
-//         setValue('bio', res.data.profile?.bio || '');
-//       } catch (err) {
-//         console.log(err)
-//         // toast.error('Failed to load driver profile');
-//       }
-//     };
-//     fetchProfile();
-//   }, [setValue]);
-
-//   const onSubmit = async (data) => {
-//     setLoading(true);
-//     try {
-  
-//       await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/driver/profile`, data, {
-//           headers: {
-//                 'Authorization': `Bearer ${token}`
-//             }
-//       });
-//       toast.success('Driver profile updated successfully! 🎉');
-//     } catch (err) {
-//       console.log(err)
-//       toast.error(err.response?.data?.message || 'Update failed');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const toggleSelection = (field, value) => {
-//     const current = watch(field) || [];
-//     if (current.includes(value)) {
-//       setValue(field, current.filter(v => v !== value));
-//     } else {
-//       setValue(field, [...current, value]);
-//     }
-//   };
-
-//   return (
-//     <motion.div
-//       initial={{ opacity: 0, y: 20 }}
-//       animate={{ opacity: 1, y: 0 }}
-//       className="max-w-5xl mx-auto py-8 px-4"
-//     >
-//       <div className="text-center mb-12">
-//         <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-4">
-//           <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-xl">
-//             <Car className="h-10 w-10 text-white" />
-//           </div>
-//           Driver Professional Profile
-//         </h1>
-//         <p className="text-gray-600 mt-3">Update your specialties to get better matching jobs</p>
-//       </div>
-
-//       <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
-//         {/* Driver Categories */}
-//         <section className="bg-white rounded-3xl shadow-lg p-8 border">
-//           <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-//             <Gauge className="h-7 w-7 text-blue-600" />
-//             Driver Specialties
-//           </h2>
-//           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-//             {DRIVER_CATEGORIES.map(cat => (
-//               <label
-//                 key={cat}
-//                 className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
-//                   watch('categories')?.includes(cat)
-//                     ? 'border-blue-500 bg-blue-50 shadow-md'
-//                     : 'border-gray-200 hover:border-gray-300'
-//                 }`}
-//               >
-//                 <input
-//                   type="checkbox"
-//                   className="hidden"
-//                   value={cat}
-//                   onChange={() => toggleSelection('categories', cat)}
-//                 />
-//                 <span className="capitalize flex-1">{cat.replace('-', ' ')}</span>
-//                 {watch('categories')?.includes(cat) && <CheckCircle className="h-5 w-5 text-blue-600" />}
-//               </label>
-//             ))}
-//           </div>
-//         </section>
-
-//         {/* Expected Earnings */}
-//         <section className="bg-white rounded-3xl shadow-lg p-8 border">
-//           <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-//             <DollarSign className="h-7 w-7 text-green-600" />
-//             Expected Earnings (Monthly)
-//           </h2>
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
-//             <div>
-//               <label className="block text-sm font-medium text-gray-700 mb-2">Minimum</label>
-//               <input
-//                 {...register('expectedEarnings.min', { required: true })}
-//                 type="number"
-//                 className="w-full px-5 py-4 border rounded-xl focus:ring-4 focus:ring-blue-100"
-//                 placeholder="50000"
-//               />
-//             </div>
-//             <div>
-//               <label className="block text-sm font-medium text-gray-700 mb-2">Maximum</label>
-//               <input
-//                 {...register('expectedEarnings.max', { required: true })}
-//                 type="number"
-//                 className="w-full px-5 py-4 border rounded-xl focus:ring-4 focus:ring-blue-100"
-//                 placeholder="100000"
-//               />
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* Experience & Transmission */}
-//         <section className="bg-white rounded-3xl shadow-lg p-8 border">
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-//             <div>
-//               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-//                 <Calendar className="h-7 w-7 text-purple-600" />
-//                 Years of Experience
-//               </h2>
-//               <input
-//                 {...register('yearsOfExperience', { required: true, min: 0 })}
-//                 type="number"
-//                 className="w-full max-w-xs px-5 py-4 border rounded-xl"
-//                 placeholder="8"
-//               />
-//             </div>
-
-//             <div>
-//               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-//                 <Car className="h-7 w-7 text-orange-600" />
-//                 Transmission Comfortable With
-//               </h2>
-//               <div className="flex gap-6">
-//                 {TRANSMISSIONS.map(trans => (
-//                   <label key={trans} className="flex items-center gap-3 cursor-pointer">
-//                     <input
-//                       type="checkbox"
-//                       value={trans}
-//                       onChange={() => toggleSelection('transmission', trans)}
-//                       className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-//                     />
-//                     <span className="capitalize">{trans}</span>
-//                   </label>
-//                 ))}
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* Languages & Travel */}
-//         <section className="bg-white rounded-3xl shadow-lg p-8 border">
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-//             <div>
-//               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-//                 <Languages className="h-7 w-7 text-teal-600" />
-//                 Languages Spoken
-//               </h2>
-//               <div className="space-y-3">
-//                 {LANGUAGES.map(lang => (
-//                   <label key={lang} className="flex items-center gap-3 cursor-pointer">
-//                     <input
-//                       type="checkbox"
-//                       value={lang}
-//                       onChange={() => toggleSelection('languagesSpoken', lang)}
-//                       className="w-5 h-5 text-blue-600 rounded"
-//                     />
-//                     <span>{lang}</span>
-//                   </label>
-//                 ))}
-//               </div>
-//             </div>
-
-//             <div>
-//               <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-//                 <Globe className="h-7 w-7 text-indigo-600" />
-//                 Travel Availability
-//               </h2>
-//               <div className="space-y-5">
-//                 <label className="flex items-center gap-4 cursor-pointer">
-//                   <input
-//                     type="checkbox"
-//                     {...register('travelCapabilities.interstate')}
-//                     className="w-6 h-6 text-blue-600 rounded"
-//                   />
-//                   <div>
-//                     <p className="font-semibold">Interstate Travel</p>
-//                     <p className="text-sm text-gray-600">Willing to drive between states/provinces</p>
-//                   </div>
-//                 </label>
-
-//                 <label className="flex items-center gap-4 cursor-pointer">
-//                   <input
-//                     type="checkbox"
-//                     {...register('travelCapabilities.international')}
-//                     className="w-6 h-6 text-blue-600 rounded"
-//                   />
-//                   <div>
-//                     <p className="font-semibold">International Travel</p>
-//                     <p className="text-sm text-gray-600">Can cross international borders</p>
-//                   </div>
-//                 </label>
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-
-//         {/* Bio */}
-//         <section className="bg-white rounded-3xl shadow-lg p-8 border">
-//           <h2 className="text-2xl font-bold mb-6">Professional Bio (Optional)</h2>
-//           <textarea
-//             {...register('bio')}
-//             rows="5"
-//             className="w-full px-5 py-4 border rounded-xl focus:ring-4 focus:ring-blue-100"
-//             placeholder="Tell clients about your experience, punctuality, or special skills..."
-//           />
-//         </section>
-
-//         {/* Submit */}
-//         <div className="flex justify-center">
-//           <motion.button
-//             whileHover={{ scale: 1.03 }}
-//             whileTap={{ scale: 0.98 }}
-//             type="submit"
-//             disabled={loading}
-//             className="px-16 py-5 text-xl font-bold text-white rounded-2xl shadow-2xl disabled:opacity-70"
-//             style={{
-//               background: `linear-gradient(135deg, ${PRIMARY_500}, #1D4ED8)`,
-//             }}
-//           >
-//             {loading ? 'Saving...' : 'Save Driver Profile'}
-//           </motion.button>
-//         </div>
-//       </form>
-//     </motion.div>
-//   );
-// };
-
-// export default DriverProfileUpdate; 
-
 
 
 
@@ -347,7 +50,8 @@ const DriverProfileUpdate = () => {
   const [loading, setLoading] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [profile, setProfile] = useState(null);
-
+const [isAvailable, setIsAvailable] = useState(false);
+const [availabilityUpdating, setAvailabilityUpdating] = useState(false);
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm();
 
   // ─── Fetch driver profile on mount and prefill ────────────────────────
@@ -362,6 +66,8 @@ const DriverProfileUpdate = () => {
         const profileData = res.data?.profile || {};
         setProfile(profileData);
 
+  
+setIsAvailable(!!(profileData.isAvailable ?? user?.isAvailable));
         setValue('categories', Array.isArray(profileData.categories) ? profileData.categories : []);
         setValue('expectedEarnings.min', profileData.expectedEarnings?.min ?? '');
         setValue('expectedEarnings.max', profileData.expectedEarnings?.max ?? '');
@@ -396,6 +102,29 @@ const DriverProfileUpdate = () => {
       setLoading(false);
     }
   };
+
+  const handleToggleAvailability = async () => {
+  if (availabilityUpdating) return;
+
+  const nextValue = !isAvailable;
+  setAvailabilityUpdating(true);
+  setIsAvailable(nextValue); // optimistic flip
+
+  try {
+    await axios.patch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/availability`,
+      { isAvailable: nextValue },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    toast.success(nextValue ? "You're now available for hire" : "You're now marked unavailable");
+  } catch (err) {
+    console.error(err);
+    setIsAvailable(!nextValue); // roll back on failure
+    toast.error(err.response?.data?.message || 'Could not update availability');
+  } finally {
+    setAvailabilityUpdating(false);
+  }
+};
 
   const toggleSelection = (field, value) => {
     const current = watch(field) || [];
@@ -471,6 +200,36 @@ const DriverProfileUpdate = () => {
                 />
               </div>
             </div>
+
+            {/* Availability switch */}
+<div className="mt-5 flex items-center justify-center sm:justify-start gap-3">
+  <button
+    type="button"
+    onClick={handleToggleAvailability}
+    disabled={availabilityUpdating}
+    role="switch"
+    aria-checked={isAvailable}
+    className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
+      isAvailable ? 'bg-emerald-400' : 'bg-white/25'
+    }`}
+  >
+    <span
+      className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
+        isAvailable ? 'translate-x-7' : 'translate-x-1'
+      }`}
+    />
+  </button>
+  <span className="text-sm font-semibold text-white flex items-center gap-1.5">
+    {availabilityUpdating ? (
+      <span className="h-3.5 w-3.5 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+    ) : (
+      <span
+        className={`h-2 w-2 rounded-full ${isAvailable ? 'bg-emerald-300' : 'bg-white/40'}`}
+      />
+    )}
+    {isAvailable ? 'Available for hire' : 'Currently unavailable'}
+  </span>
+</div>
           </div>
         </div>
       </div>
@@ -685,3 +444,14 @@ const DriverProfileUpdate = () => {
 };
 
 export default DriverProfileUpdate;
+
+
+
+
+
+
+
+
+
+
+

@@ -26,6 +26,7 @@ const formatCategory = (cat) =>
 const DriversList = () => {
   const [completedCounts, setCompletedCounts] = useState({});
   const [drivers, setDrivers] = useState([]);
+  const [nameSearch, setNameSearch] = useState('');
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [pricingConfigs, setPricingConfigs] = useState([]);
@@ -655,6 +656,15 @@ const estimateETA = (distanceKm) => {
   const avgSpeed = 40;
   return Math.round((distanceKm / avgSpeed) * 60);
 };
+
+
+const filteredDrivers = drivers.filter((driver) => {
+  if (!nameSearch.trim()) return true;
+  const fullName = `${driver.user?.firstName || ''} ${driver.user?.lastName || ''}`.toLowerCase();
+  const businessName = driver.user?.providerProfile?.businessName?.toLowerCase() || '';
+  const query = nameSearch.toLowerCase().trim();
+  return fullName.includes(query) || businessName.includes(query);
+});
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -681,6 +691,30 @@ const estimateETA = (distanceKm) => {
               Clear All
             </button>
           </div>
+
+          <div className="relative mb-5">
+  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+  <input
+    type="text"
+    value={nameSearch}
+    onChange={(e) => setNameSearch(e.target.value)}
+    placeholder="Search drivers by name..."
+    className="w-full pl-12 pr-10 py-3.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-base"
+  />
+  {nameSearch && (
+    <button
+      onClick={() => setNameSearch('')}
+      className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition"
+    >
+      <X className="h-4 w-4 text-gray-400" />
+    </button>
+  )}
+</div>
+{nameSearch && (
+  <p className="text-sm text-gray-500 -mt-3 mb-4">
+    Showing {filteredDrivers.length} of {drivers.length} drivers
+  </p>
+)}
 
           <div className="overflow-x-auto pb-2 scrollbar-hide">
             <div className="flex gap-3 min-w-max">
@@ -724,13 +758,22 @@ const estimateETA = (distanceKm) => {
           <div className="flex justify-center py-20">
             <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
           </div>
-        ) : drivers.length === 0 ? (
-          <div className="text-center py-20 text-gray-600 text-xl font-medium">
-            No drivers found. Try adjusting your filters.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {drivers.map(driver => (
+        // ) : drivers.length === 0 ? (
+        //   <div className="text-center py-20 text-gray-600 text-xl font-medium">
+        //     No drivers found. Try adjusting your filters.
+        //   </div>
+        // ) : (
+        //   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        //     {drivers.map(driver => (
+          ) : filteredDrivers.length === 0 ? (
+  <div className="text-center py-20 text-gray-600 text-xl font-medium">
+    {nameSearch
+      ? `No drivers found matching "${nameSearch}".`
+      : 'No drivers found. Try adjusting your filters.'}
+  </div>
+) : (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+    {filteredDrivers.map(driver => (
               <motion.div
                 key={driver._id}
                 whileHover={{ y: -8, scale: 1.02 }}

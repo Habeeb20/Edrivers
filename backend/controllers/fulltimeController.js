@@ -253,7 +253,7 @@ export const getPendingFulltimeSubscriptions = async (req, res) => {
   try {
     const pending = await Subscription.find({
       type: 'fulltime_hire',
-      subscriptionStatus: 'pending'
+      // subscriptionStatus: 'pending'
     })
       .populate('user', 'firstName lastName email phone address dateOfBirth state lga  avatar')
       .sort({ subscribedAt: -1 })
