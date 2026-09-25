@@ -537,7 +537,7 @@ const Dashboard = () => {
       {/* Hamburger Button */}
       <button
         onClick={() => setIsSidebarOpen(true)}
-        className="fixed top-4 left-4 z-60 p-3 bg-white rounded-full shadow-xl md:hidden"
+        className="fixed top-4 left-4 z-60 p-3  mt-10 bg-white rounded-full shadow-xl md:hidden"
       >
         <Menu className="h-7 w-7 text-gray-800" />
       </button>

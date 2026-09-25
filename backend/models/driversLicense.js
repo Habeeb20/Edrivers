@@ -54,6 +54,8 @@ driverLicenseSchema.pre("save", function(next) {
     this.expiresAt = new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000);
   }
 
+
+  
 });
 
 export default mongoose.model("DriverLicense", driverLicenseSchema);

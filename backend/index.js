@@ -4,7 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import { connectDb } from "./db.js";
-
+import mongoose from "mongoose";
 import User from "./models/User.js";
 import userRoutes from "./routes/userRoutes.js";
 import messageRoutes from "./routes/conversationRoute.js";
@@ -137,6 +137,17 @@ app.get('/api/geocode', async (req, res) => {
 });
 
 
+
+
+
+
+// async function run() {
+//   await mongoose.connect(process.env.MONGO_URI);
+//   await mongoose.connection.collection("driverlicenses").dropIndex("nin_1");
+//   console.log("Index dropped");
+//   await mongoose.disconnect();
+// }
+// run();
 
 
 

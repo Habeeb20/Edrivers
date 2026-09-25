@@ -96,9 +96,9 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 pt-8 text-center">
           <p className="text-gray-400">
-            © {new Date().getFullYear()} edrivers. All rights reserved. | 
-            <a href="#" className="hover:text-white mx-2">Privacy Policy</a> | 
-            <a href="#" className="hover:text-white mx-2">Terms of Service</a>
+            © {new Date().getFullYear()} edrivers. All rights reserved. 
+            {/* <a href="#" className="hover:text-white mx-2">Privacy Policy</a> | 
+            <a href="#" className="hover:text-white mx-2">Terms of Service</a> */}
           </p>
         </div>
       </div>
