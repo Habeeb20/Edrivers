@@ -4,10 +4,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  CheckCircle, XCircle, Clock, DollarSign, MapPin, User, Phone, Mail, Home,
+  CheckCircle, XCircle, Clock, DollarSign, MapPin, User, Phone, Mail, Home,Ban,
   Eye, X, Star, MessageSquare, Send, Paperclip, Flag, ShieldAlert, Calendar,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import HireRequestDetails from "../subPages/HireRequestDetails"
+import CancelHireModal from "../subPages/CancelHireModal"
+
+import WhatsAppButton from '../subPages/whatsappButton';
 
 const STATUS_META = {
   pending:                 { label: 'Pending',           bg: 'bg-amber-100',   text: 'text-amber-800' },
@@ -19,6 +23,7 @@ const STATUS_META = {
   declined:                { label: 'Declined',           bg: 'bg-red-100',     text: 'text-red-700' },
   cancelled:               { label: 'Cancelled',          bg: 'bg-red-100',     text: 'text-red-700' },
   rejected:                { label: 'Rejected',           bg: 'bg-red-100',     text: 'text-red-700' },
+  
 };
 
 const REPORT_REASONS = [
@@ -40,7 +45,7 @@ const MyHires = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
-
+const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEndModal, setShowEndModal] = useState(false);
   const [showRateModal, setShowRateModal] = useState(false);
@@ -293,6 +298,7 @@ const handleRating = async () => {
   { value: 'active', label: 'Active' },
   { value: 'ended', label: 'Ended' },
   { value: 'declined', label: 'Declined' },
+  { value: 'cancelled', label: 'Cancelled' },
 ];
 
 // "pending" tab also catches pending_approval / awaiting_admin_approval so
@@ -399,6 +405,7 @@ const statusCounts = requests.reduce((acc, req) => {
               const canChat = ['active', 'accepted', 'awaiting_admin_approval'].includes(req.status);
               const canEnd = req.status === 'active' || req.status === 'accepted';
               const canRate = req.status === 'ended';
+              const canCancel = ['accepted', 'active', 'awaiting_admin_approval'].includes(req.status);
               // const canRate = req.status === 'ended' && !req.rated;
               const canReport = ['active', 'accepted', 'ended', 'awaiting_admin_approval'].includes(req.status);
 
@@ -484,6 +491,13 @@ const statusCounts = requests.reduce((acc, req) => {
                       </>
                     )}
 
+                    {['accepted', 'active', 'ended'].includes(req.status) && (
+  <WhatsAppButton
+    phone={req.client?.phone}
+    message={`Hello ${req.client?.firstName || ''}, this is your driver regarding our hire${req.hireReference ? ` (${req.hireReference})` : ''}.`}
+  />
+)}
+
                     {canChat && (
                       <button
                         onClick={() => openChatModal(req)}
@@ -501,6 +515,15 @@ const statusCounts = requests.reduce((acc, req) => {
                         End Hire
                       </button>
                     )}
+
+                    {canCancel && (
+  <button
+    onClick={() => { setSelectedRequest(req); setShowCancelModal(true); }}
+    className="flex-1 sm:flex-none px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+  >
+    <Ban className="h-4 w-4" /> Cancel
+  </button>
+)}
 
                     {/* {canRate && (
                       <button
@@ -576,6 +599,11 @@ const statusCounts = requests.reduce((acc, req) => {
                   <p className="flex items-center gap-2.5 text-gray-700">
                     <Phone className="h-4 w-4 text-emerald-600 shrink-0" />
                     {selectedRequest.client?.phone || 'Not provided'}
+                    <WhatsAppButton
+  phone={selectedRequest.client?.phone}
+  label="Chat on WhatsApp"
+  className="w-full sm:w-auto"
+/>
                   </p>
                   <p className="flex items-center gap-2.5 text-gray-700 break-all">
                     <Mail className="h-4 w-4 text-blue-600 shrink-0" />
@@ -601,6 +629,7 @@ const statusCounts = requests.reduce((acc, req) => {
                 </div>
               </div>
             </div>
+            <HireRequestDetails hire={selectedRequest} />
 
             <button
               onClick={() => setShowDetailsModal(false)}
@@ -845,6 +874,16 @@ const statusCounts = requests.reduce((acc, req) => {
           </div>
         </div>
       )}
+
+
+      {showCancelModal && selectedRequest && (
+  <CancelHireModal
+    hire={selectedRequest}
+    token={token}
+    onClose={() => setShowCancelModal(false)}
+    onCancelled={fetchRequests}
+  />
+)}
     </div>
   );
 };

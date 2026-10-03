@@ -45,6 +45,7 @@ import AdminTrainingRegistrations from './AdminTraining';
 import AdminDriverDetails from './DownloadDriverDetails';
 import AnnouncementManager from './AdminAnnouncement';
 import PostVideoForm from './VideoUpload';
+import AdminPayments from './AdminPayment';
 
 const PRIMARY = '#9333EA';
 
@@ -79,6 +80,7 @@ const AdminDashboard = () => {
     { view: 'video', label: 'Video Upload', icon: Video },
     { view: 'message', label: 'Message', icon: Video },
     { view: 'settings', label: 'Settings', icon: Settings },
+    { view: 'payments', label: 'Payments', icon: Settings },
   ];
 
   useEffect(() => {
@@ -214,6 +216,8 @@ const AdminDashboard = () => {
         return <AnnouncementManager />;
       case 'video':
         return <PostVideoForm />;
+      case 'payments':
+        return <AdminPayments />;
       case 'driversDetails':
         return <DriverDetails />;
       default:

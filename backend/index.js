@@ -27,8 +27,14 @@ import videorouter from "./routes/videoRoutes.js"
 import { activityMiddleware, protect } from "./middleware/verifyToken.js";
 import walletRoutes from "./routes/walletRoute.js"
 import loyaltyRoutes from "./routes/loyaltyRoutes.js"
+import adminPayments, { paystackWebhook } from './routes/AdminPayment.js';
+
 dotenv.config();
 const app = express();
+
+// 1. Webhook FIRST, with the raw body (Paystack's signature check needs the unparsed bytes)
+app.post('/api/webhooks/paystack', express.raw({ type: 'application/json' }), paystackWebhook);
+
 connectDb()
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -81,6 +87,7 @@ app.use("/api/vetted-drivers", vettedDriversRoute)
 app.use("/api/fulltime-hire", fulltimeRoute)
 app.use("/api/announcements", announcementsRoute)
 app.use('/api/loyalty', loyaltyRoutes)
+app.use('/api/admin/payments', adminPayments); 
 // ...
 
 // await User.create({
@@ -158,6 +165,18 @@ app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
 
 })
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -15,6 +15,7 @@ import {
   getDriverHireCount,
   getRatingSummary,
   getUserRatings,
+  cancelHire
 //   createHireJob,
 //   getAvailableHires,
 //   applyToHire,
@@ -43,7 +44,7 @@ router.post('/payment/initialize', initializeHirePayment);    // Client starts p
 router.put('/accept/:hireId', acceptHire);                    // Driver accepts
 router.put('/decline/:hireId', declineHire);                  // Driver declines
 router.get('/my-requests', getMyHireRequests);                // Driver sees incoming requests
-
+router.put('/cancel/:id',  cancelHire);
 // ─── Both client & driver ──────────────────────────────────────────
 router.put('/end/:hireId', endHire);                          // End active hire
 router.post('/rate', submitRating);  

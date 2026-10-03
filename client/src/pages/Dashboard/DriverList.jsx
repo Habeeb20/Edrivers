@@ -18,8 +18,10 @@ import { getProviderCoords } from '../../utils/GeocodeAddress';
 import { useRef } from 'react'; // add to existing react import
 
 import { timeAgo, formatJoinDate } from '../../utils/formatTime';
+import HireModal from "../subPages/HireModal"
 
 import { fetchRoute, fetchDistance, fetchLgaCenter, searchGeocode } from '../../utils/geoapi';
+import DriverProfileDetails from '../subPages/DriverProfileModalDetail';
 const formatCategory = (cat) =>
   cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
@@ -374,31 +376,35 @@ const fetchDriverHistory = async (driver) => {
     setShowDetailsModal(true);
   };
 
-  const openHireModal = (driver) => {
+//   const openHireModal = (driver) => {
+    
+//   setSelectedDriver(driver);
+
+//   let prefilledCategory = '';
+//   if (searchParams.category) {
+//     prefilledCategory = searchParams.category; // single selected category
+//   }
+
+//   // We'll calculate suggested amount after category & duration are set
+//   setForm({
+//     durationHours: '',
+//     amountOffered: '',           // will be set via useEffect once calculated
+//     category: prefilledCategory,
+//     address: '',
+//     description:'',
+//     date:'',
+//     time:'',
+//     accommodation: false,
+//     benefits: '',
+//   });
+//   setCalculatedAmount(0);
+//   setShowHireModal(true);
+// };
+
+const openHireModal = (driver) => {
   setSelectedDriver(driver);
-
-  let prefilledCategory = '';
-  if (searchParams.category) {
-    prefilledCategory = searchParams.category; // single selected category
-  }
-
-  // We'll calculate suggested amount after category & duration are set
-  setForm({
-    durationHours: '',
-    amountOffered: '',           // will be set via useEffect once calculated
-    category: prefilledCategory,
-    address: '',
-    description:'',
-    date:'',
-    time:'',
-    accommodation: false,
-    benefits: '',
-  });
-  setCalculatedAmount(0);
   setShowHireModal(true);
 };
-
-
 
 useEffect(() => {
   console.log("useEffect triggered → category:", JSON.stringify(form.category));
@@ -947,7 +953,7 @@ const filteredDrivers = drivers.filter((driver) => {
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="bg-white w-full sm:max-w-4xl sm:rounded-3xl rounded-t-3xl shadow-2xl max-h-[92vh] overflow-y-auto relative"
     >
-      {/* Close button */}
+
       <button
         onClick={() => setShowDetailsModal(false)}
         className="absolute top-4 right-4 z-10 p-2.5 bg-white/90 backdrop-blur rounded-full shadow-md hover:bg-white transition"
@@ -955,7 +961,7 @@ const filteredDrivers = drivers.filter((driver) => {
         <X className="h-5 w-5 text-gray-700" />
       </button>
 
-      {/* ===== Hero Header ===== */}
+   
       <div className="bg-gradient-to-br from-blue-600 via-blue-600 to-blue-600 px-6 pt-10 pb-16 sm:rounded-t-3xl relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,white,transparent_60%)]" />
         <div className="relative text-center">
@@ -971,14 +977,11 @@ const filteredDrivers = drivers.filter((driver) => {
             <MapPin className="h-4 w-4" />
             {selectedDriver.user?.lga}{selectedDriver.user?.state ? `, ${selectedDriver.user.state}` : ''}
           </p>
-          {/* <div className="inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 bg-white/15 backdrop-blur rounded-full text-white text-sm font-medium">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            {selectedDriver.user?.rating || '5.0'} Rating
-          </div> */}
+     
         </div>
       </div>
 
-      {/* Quick stat chips - overlapping the hero */}
+  
       <div className="px-4 sm:px-8 -mt-8 relative">
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 grid grid-cols-2 sm:grid-cols-3 divide-x divide-gray-100">
           <div className="p-4 text-center">
@@ -1007,11 +1010,10 @@ const filteredDrivers = drivers.filter((driver) => {
         </div>
       </div>
 
-      {/* ===== Content ===== */}
       <div className="p-4 sm:p-8 space-y-6">
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Personal Info */}
+    
           <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
             <h3 className="text-base font-bold mb-3 flex items-center gap-2 text-gray-900">
               <User className="h-5 w-5 text-blue-600" /> Personal Info
@@ -1028,7 +1030,7 @@ const filteredDrivers = drivers.filter((driver) => {
             </div>
           </div>
 
-          {/* Vehicle */}
+   
           <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
             <h3 className="text-base font-bold mb-3 flex items-center gap-2 text-gray-900">
               <Car className="h-5 w-5 text-blue-600" /> Vehicle
@@ -1047,7 +1049,7 @@ const filteredDrivers = drivers.filter((driver) => {
           </div>
         </div>
 
-        {/* Languages & Travel */}
+      
         {selectedProfile && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
@@ -1088,7 +1090,7 @@ const filteredDrivers = drivers.filter((driver) => {
           </div>
         )}
 
-        {/* Earnings */}
+    
         {selectedProfile?.expectedEarnings && (
           <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-5 border border-emerald-100">
             <h3 className="text-base font-bold mb-2 flex items-center gap-2 text-gray-900">
@@ -1105,7 +1107,9 @@ const filteredDrivers = drivers.filter((driver) => {
           </div>
         )}
 
-        {/* Driver Profile Specialties (legacy fallback) */}
+        {/* Full driver profile */}
+{selectedProfile && <DriverProfileDetails profile={selectedProfile} />}
+      
         {selectedDriver.driverProfile && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
@@ -1134,7 +1138,7 @@ const filteredDrivers = drivers.filter((driver) => {
           </div>
         )}
 
-        {/* Bio */}
+ 
         {(selectedProfile?.bio || selectedDriver.bio) && (
           <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
             <h3 className="text-base font-bold mb-3 text-gray-900">About Me</h3>
@@ -1144,7 +1148,7 @@ const filteredDrivers = drivers.filter((driver) => {
           </div>
         )}
 
-        {/* Distance info */}
+
         <DistanceInfo
           providerAddressParts={{
             address: selectedDriver.user?.address || '',
@@ -1155,7 +1159,7 @@ const filteredDrivers = drivers.filter((driver) => {
         />
       </div>
 
-      {/* ===== Sticky Hire Button ===== */}
+    
       <div className="sticky bottom-0 bg-white/95 backdrop-blur border-t border-gray-100 p-4 sm:p-6">
         <button
           onClick={() => {
@@ -1170,309 +1174,21 @@ const filteredDrivers = drivers.filter((driver) => {
     </motion.div>
   </div>
 )}
-      {/* Hire Modal - Scrollable */}
-      {showHireModal && selectedDriver && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative"
-          >
-            <button
-              onClick={() => setShowHireModal(false)}
-              className="absolute top-4 right-4 p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition"
-            >
-              <X className="h-6 w-6" />
-            </button>
 
-            <h2 className="text-3xl font-bold text-center mb-8">
-              Hire {selectedDriver.user?.firstName} {selectedDriver.user?.lastName}
-            </h2>
 
-            <div className="space-y-6">
-              {/* Category */}
-              <div>
-                <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <List className="h-6 w-6 text-blue-600" /> Service Category
-                </label>
-                <select
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition bg-white text-base"
-                  required
-                >
-                  <option value="">Select service type...</option>
-                  {driverCategories.map(cat => (
-                    <option key={cat} value={cat}>
-                      {formatCategory(cat)}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
-              {/* category price grid*/}
-         {/* category price grid */}
-{selectedCategoryPricing ? (
-  <div className="mt-5 p-6 bg-white rounded-2xl shadow-md border border-blue-100">
-    <h4 className="text-lg font-bold text-blue-700 mb-5 text-center">
-      Current Rates – {formatCategory(form.category)}
-    </h4>
 
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      <div className="flex flex-col items-center p-4 bg-blue-50 rounded-xl">
-        <Clock className="h-6 w-6 text-blue-600 mb-2" />
-        <span className="text-xs text-gray-600">per hour</span>
-        <span className="text-xl font-bold text-blue-800 mt-1">
-          ₦{(selectedCategoryPricing.hourlyRate || 0).toLocaleString()}
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center p-4 bg-green-50 rounded-xl">
-        <CalendarIcon className="h-6 w-6 text-green-600 mb-2" />
-        <span className="text-xs text-gray-600">per day</span>
-        <span className="text-xl font-bold text-green-800 mt-1">
-          ₦{(selectedCategoryPricing.dailyRate || 0).toLocaleString()}
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center p-4 bg-blue-50 rounded-xl">
-        <CalendarIcon className="h-6 w-6 text-blue-600 mb-2" />
-        <span className="text-xs text-gray-600">per week</span>
-        <span className="text-xl font-bold text-blue-800 mt-1">
-          ₦{(selectedCategoryPricing.weeklyRate || 0).toLocaleString()}
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center p-4 bg-amber-50 rounded-xl">
-        <CalendarIcon className="h-6 w-6 text-amber-600 mb-2" />
-        <span className="text-xs text-gray-600">per month</span>
-        <span className="text-xl font-bold text-amber-800 mt-1">
-          ₦{(selectedCategoryPricing.monthlyRate || 0).toLocaleString()}
-        </span>
-      </div>
-    </div>
-
-<h4 className='pt-5 ml-5 font-bold text-black'>
-  call out charge:<span className='text-blue-600 pl-2 text-2xl'>
-₦{(selectedCategoryPricing.callOutCharge || 0).toLocaleString()}
-</span>
-</h4>
-
-    {selectedCategoryPricing.description && (
-      <p className="mt-4 text-sm text-gray-600 text-center italic">
-        {selectedCategoryPricing.description}
-      </p>
-    )}
-  </div>
-) : form.category ? (
-  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm text-center">
-    No pricing found for "{form.category}"
-  </div>
-) : null}
-              {/* Duration */}
-              <div>
-                <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Clock className="h-6 w-6 text-blue-600" /> Duration (hours)
-                </label>
-                <input
-                  type="number"
-                  value={form.durationHours}
-                  onChange={(e) => setForm({ ...form, durationHours: e.target.value })}
-                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-base"
-                  placeholder="e.g. 4"
-                  min="1"
-                  required
-                />
-              </div>
-
-              {/* Amount */}
-           
-
-              <div>
-  <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-    <DollarSign className="h-6 w-6 text-blue-600" /> Negotiate (₦)
-  </label>
-  <input
-    type="number"
-    value={form.amountOffered}
-    onChange={handleAmountChange}
-    onKeyDown={(e) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        e.preventDefault(); // prevent default browser behavior
-        const current = Number(form.amountOffered) || calculatedAmount || 0;
-        const step = 500;
-        let newValue;
-
-        if (e.key === 'ArrowUp') {
-          newValue = current + step;
-        } else {
-          newValue = Math.max(0, current - step);
-        }
-
-        // Enforce minimum 75% rule
-        if (calculatedAmount > 0) {
-          const minAllowed = calculatedAmount * 0.75;
-          if (newValue < minAllowed) {
-            toast.error(
-              `Amount cannot go below 75% of suggested price (₦${Math.round(minAllowed).toLocaleString()}).`
-            );
-            return;
-          }
-        }
-
-        setForm(prev => ({ ...prev, amountOffered: newValue.toString() }));
-      }
-    }}
-    className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-100 transition text-base"
-    placeholder="Enter your offer"
-    min="1000"
-    step="500" // visual hint for keyboard users
-    required
+    {showHireModal && selectedDriver && (
+  <HireModal
+    driver={selectedDriver}
+    token={token}
+    pricingConfigs={pricingConfigs}
+    driverCategories={driverCategories}
+    initialCategory={searchParams.category}
+    isLoaded={isLoaded}
+    onClose={() => setShowHireModal(false)}
   />
-
-  {calculatedAmount > 0 && (
-    <p className="text-sm text-gray-600 mt-2 leading-relaxed">
-      Suggested amount: <strong className='text-bolder text-green-800 text-3xl'> ₦{calculatedAmount.toLocaleString()}</strong><br />
-      You can adjust using ↑ / ↓ arrow keys (changes by ₦500). Your final offer must be at least 75% of the suggested amount to ensure fair driver compensation.
-    </p>
-  )}
-</div>
-
-              {/* Address */}
-              <div>
-                <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <MapPin className="h-6 w-6 text-blue-600" /> Pickup Address
-                </label>
-     
-      {/* <input
-        type="text"
-        placeholder="Enter pickup address"
-        className="w-full p-3 border rounded-lg text-sm focus:ring-2 focus:ring-customGreen"
-        value={form.address}
-        onChange={(e) => setForm({ ...form, address: e.target.value })}
-        required
-      /> */}
-  
-                <Autocomplete
-      onLoad={(autoComplete) => {
-        // optional: store ref
-      }}
-      onPlaceChanged={() => {
-        // get place here
-      }}
-      options={{
-        types: ['geocode'],
-        componentRestrictions: { country: 'ng' },
-      }}
-    >
-      <input
-        type="text"
-        placeholder="Enter pickup address"
-        className="w-full p-3 border rounded-lg text-sm focus:ring-2 focus:ring-customGreen"
-        value={form.address}
-        onChange={(e) => setForm({ ...form, address: e.target.value })}
-        required
-      />
-    </Autocomplete>
-          
-              </div>
-              <div>
-                <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Calendar1 className="h-6 w-6 text-blue-600" />Description(Why do you want to hire a driver)
-                </label>
-                   <input
-                  type="texr"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-base"
-                  placeholder="e.g. 4"
-               
-                  required
-                />
-              </div>
-             
-              <div>
-                <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Calendar1 className="h-6 w-6 text-blue-600" />Date
-                </label>
-                   <input
-                  type="date"
-                  value={form.date}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-base"
-                  placeholder="e.g. 4"
-               
-                  required
-                />
-              </div>
-
-                 <div>
-                <label className="block text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Clock1 className="h-6 w-6 text-blue-600" />Time
-                </label>
-                   <input
-                  type="time"
-                  value={form.time}
-                  onChange={(e) => setForm({ ...form, time: e.target.value })}
-                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-base"
-                  placeholder="e.g. 4"
-               
-                  required
-                />
-              </div>
-
-              {/* Accommodation */}
-              <div className="flex items-center gap-4 py-4">
-                <input
-                  type="checkbox"
-                  id="accommodation"
-                  checked={form.accommodation}
-                  onChange={(e) => setForm({ ...form, accommodation: e.target.checked })}
-                  className="w-6 h-6 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="accommodation" className="text-lg font-medium flex items-center gap-3 cursor-pointer">
-                  <Home className="h-6 w-6 text-blue-600" />
-                  Provide Accommodation
-                </label>
-              </div>
-
-              {/* Benefits */}
-              <div>
-                <label className="block text-lg font-semibold mb-3">Additional Benefits (optional)</label>
-                <textarea
-                  value={form.benefits}
-                  onChange={(e) => setForm({ ...form, benefits: e.target.value })}
-                  rows="4"
-                  className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition text-base"
-                  placeholder="Meals, fuel allowance, weekend off, etc."
-                />
-              </div>
-
-              <button
-                onClick={() => {
-                  if (!form.category || !form.durationHours || !form.amountOffered || !form.address) {
-                    toast.error('Please complete all required fields');
-                    return;
-                  }
-                  setShowConfirmModal(true);
-                }}
-                disabled={actionLoading}
-                className="w-full py-6 bg-gradient-to-r from-green-600 to-teal-600 text-white text-xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {actionLoading ? (
-                  <>
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  'Proceed to Send Request'
-                )}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
+)}
 
       {/* Confirm Modal */}
       {showConfirmModal && (
